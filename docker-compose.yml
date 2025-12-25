@@ -1,0 +1,289 @@
+services:
+  # PostgreSQL for Patient Service
+  patient-db:
+    image: postgres:15-alpine
+    container_name: patient-db
+    environment:
+      POSTGRES_DB: patientdb
+      POSTGRES_USER: patientuser
+      POSTGRES_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+    ports:
+      - "5432:5432"
+    volumes:
+      - patient-data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U patientuser -d patientdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  # patient Service
+  patient-service:
+    build: ./services/patient
+    container_name: patient-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://patient-db:5432/patientdb
+      SPRING_DATASOURCE_USERNAME: patientuser
+      SPRING_DATASOURCE_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+    ports:
+      - "9090:9090"
+    depends_on:
+      patient-db:
+        condition: service_healthy
+    networks:
+      - microservices-network
+
+#  # PostgreSQL for Staff Service
+  staff-db:
+    image: postgres:15-alpine
+    container_name: staff-db
+    environment:
+      POSTGRES_DB: staffdb
+      POSTGRES_USER: staffuser
+      POSTGRES_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+    ports:
+      - "5433:5432"
+    volumes:
+      - staff-data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U staffuser -d staffdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # staff Service
+  staff-service:
+    build: ./services/staff
+    container_name: staff-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://staff-db:5432/staffdb
+      SPRING_DATASOURCE_USERNAME: staffuser
+      SPRING_DATASOURCE_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+    ports:
+      - "9091:9091"
+    depends_on:
+      staff-db:
+        condition: service_healthy
+    networks:
+      - microservices-network
+
+  #  # PostgreSQL for rdv Service
+  rdv-db:
+    image: postgres:15-alpine
+    container_name: rdv-db
+    environment:
+      POSTGRES_DB: rdvdb
+      POSTGRES_USER: rdvuser
+      POSTGRES_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+    ports:
+      - "5434:5432"
+    volumes:
+      - rdv-data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rdvuser -d rdvdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # rdv Service
+  rdv-service:
+    build: ./services/rdv
+    container_name: rdv-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://rdv-db:5432/rdvdb
+      SPRING_DATASOURCE_USERNAME: rdvuser
+      SPRING_DATASOURCE_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+    ports:
+      - "9092:9092"
+    depends_on:
+      rdv-db:
+        condition: service_healthy
+    networks:
+      - microservices-network
+
+  #  # PostgreSQL for consultation Service
+  consultation-db:
+    image: postgres:15-alpine
+    container_name: consultation-db
+    environment:
+      POSTGRES_DB: consultationdb
+      POSTGRES_USER: consultationuser
+      POSTGRES_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+    ports:
+      - "5435:5432"
+    volumes:
+      - consultation-data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U consultationuser -d consultationdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # consultation Service
+  consultation-service:
+    build: ./services/consultation
+    container_name: consultation-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://consultation-db:5432/consultationdb
+      SPRING_DATASOURCE_USERNAME: consultationuser
+      SPRING_DATASOURCE_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+    ports:
+      - "9093:9093"
+    depends_on:
+      consultation-db:
+        condition: service_healthy
+    networks:
+      - microservices-network
+
+  ####
+  # PostgreSQL for rapport Service
+  rapport-db:
+    image: postgres:15-alpine
+    container_name: rapport-db
+    environment:
+      POSTGRES_DB: rapportdb
+      POSTGRES_USER: rapportuser
+      POSTGRES_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+    ports:
+      - "5436:5432"
+    volumes:
+      - rapport-data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U rapportuser -d rapportdb" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+  # rapport Service
+  rapport-service:
+    build: ./services/rapport
+    container_name: rapport-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://rapport-db:5432/rapportdb
+      SPRING_DATASOURCE_USERNAME: rapportuser
+      SPRING_DATASOURCE_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+    ports:
+      - "9094:9094"
+    depends_on:
+      rapport-db:
+        condition: service_healthy
+    networks:
+      - microservices-network
+
+
+
+  # PostgreSQL for keycloak
+  keycloak-db:
+    image: postgres:15-alpine
+    container_name: keycloak-db
+    environment:
+      POSTGRES_DB: keycloakdb
+      POSTGRES_USER: keycloakuser
+      POSTGRES_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+    ports:
+      - "5438:5432"
+    volumes:
+      - keycloak-data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U keycloak -d keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+
+
+# Keycloak
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4.7
+    container_name: keycloak
+    command: start-dev
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloakdb
+      KC_DB_USERNAME: keycloakuser
+      KC_DB_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?Set KEYCLOAK_ADMIN_PASSWORD in your local environment}
+      KC_HEALTH_ENABLED: true
+      KC_HOSTNAME_STRICT: false
+      KC_HTTP_ENABLED: true
+    ports:
+      - "9089:8080"
+    depends_on:
+      keycloak-db:
+        condition: service_started
+    networks:
+      - microservices-network
+    restart: on-failure
+
+
+
+
+  # auth Service
+  auth-service:
+    build: ./services/auth
+    container_name: auth-service
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: hospital-realm
+      KEYCLOAK_CLIENT_ID: auth-service-client
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:?Set KEYCLOAK_CLIENT_SECRET in your local environment}
+      KEYCLOAK_ADMIN_USERNAME: admin
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?Set KEYCLOAK_ADMIN_PASSWORD in your local environment}
+      PATIENT_SERVICE_URL: http://patient-service:9090
+      STAFF_SERVICE_URL: http://staff-service:9091
+    ports:
+      - "9095:9095"
+    depends_on:
+      keycloak:
+        condition: service_started
+      patient-service:
+        condition: service_started
+      staff-service:
+        condition: service_started
+    networks:
+      - microservices-network
+
+
+#
+#  # API Gateway
+#  api-gateway:
+#    build: ./services/api-gateway
+#    container_name: api-gateway
+#    environment:
+#      # Use Docker network service names
+#      PRODUCT_SERVICE_URL: http://product-service:8081
+#      CLIENT_SERVICE_URL: http://client-service:8084
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - product-service
+#      - client-service
+#    networks:
+#      - microservices-network
+
+volumes:
+  patient-data:
+  staff-data:
+  rdv-data:
+  consultation-data:
+  rapport-data:
+  keycloak-data:
+
+networks:
+  microservices-network:
+    driver: bridge
