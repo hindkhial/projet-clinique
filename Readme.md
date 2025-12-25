@@ -182,5 +182,3 @@ Ajouter le Dockerfile
 Mettre à jour docker-compose.yml avec le nouveau service et sa base de données
 Redémarrer : docker-compose up -d --build
 
-🤝 Contribution
-Les contributions sont les bienvenues ! N'hésitez pas à ouvrir une issue ou une pull request.
