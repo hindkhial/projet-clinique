@@ -30,6 +30,11 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="auth" options="-parameters" />
+      <module name="consultation" options="-parameters" />
+      <module name="patient" options="-parameters" />
+      <module name="rapport" options="-parameters" />
+      <module name="rdv" options="-parameters" />
       <module name="staff" options="-parameters" />
     </option>
   </component>
