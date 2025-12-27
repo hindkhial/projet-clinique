@@ -8,6 +8,8 @@ import com.ehei.staff.repositorys.StaffRepository;
 import lombok.Data;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @Data
 public class StaffService {
@@ -17,5 +19,15 @@ public class StaffService {
     public StaffResponseDto CreateStaff(StaffCreateRequestDto requestdto){
         Staff staff = staffMapper.toModel(requestdto);
         return staffMapper.toResponseDto(staffRepository.save(staff)) ;
+    }
+
+    public List<StaffResponseDto> getAll() {
+        List<Staff>  staffListe = staffRepository.findAll();
+        return staffMapper.toResponseDto(staffListe);
+    }
+
+    public StaffResponseDto getById(Long id) {
+        Staff staff = staffRepository.findById(id).orElse(new Staff());
+        return staffMapper.toResponseDto(staff);
     }
 }

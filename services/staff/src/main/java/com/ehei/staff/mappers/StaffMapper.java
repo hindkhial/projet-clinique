@@ -7,6 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Service
 @AllArgsConstructor
 public class StaffMapper {
@@ -31,5 +34,13 @@ public class StaffMapper {
                 .dateNaissance(staff.getDateNaissance())
                 .role(staff.getRole())
                 .build();
+    }
+
+    public List<StaffResponseDto> toResponseDto(List<Staff> staffListe) {
+        List<StaffResponseDto> DtoList = new ArrayList<>();
+        for (Staff staff : staffListe) {
+            DtoList.add(toResponseDto(staff));
+        }
+        return DtoList;
     }
 }
