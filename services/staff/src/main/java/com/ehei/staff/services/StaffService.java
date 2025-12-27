@@ -3,6 +3,7 @@ package com.ehei.staff.services;
 import com.ehei.staff.DTOS.Staff.StaffCreateRequestDto;
 import com.ehei.staff.DTOS.Staff.StaffResponseDto;
 import com.ehei.staff.DTOS.Staff.StaffUpdateRequestDto;
+import com.ehei.staff.exceptions.EntityNotFoundException;
 import com.ehei.staff.mappers.StaffMapper;
 import com.ehei.staff.models.Staff;
 import com.ehei.staff.repositorys.StaffRepository;
@@ -23,17 +24,17 @@ public class StaffService {
     }
 
     public List<StaffResponseDto> getAll() {
-        List<Staff>  staffListe = staffRepository.findAll();
+        List<Staff> staffListe = staffRepository.findAll();
         return staffMapper.toResponseDto(staffListe);
     }
 
     public StaffResponseDto getById(Long id) {
-        Staff staff = staffRepository.findById(id).orElse(new Staff());
+        Staff staff = staffRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Could not find staff with id: " + id));
         return staffMapper.toResponseDto(staff);
     }
 
     public StaffResponseDto update(Long id, StaffUpdateRequestDto staffdto) {
-        Staff staff = staffRepository.findById(id).orElseThrow(()-> new RuntimeException("Staff not found"));
+        Staff staff = staffRepository.findById(id).orElseThrow(()-> new EntityNotFoundException("Could not find staff with id: " + id));
         staff.setNom(staffdto.getNom());
         staff.setPrenom(staffdto.getPrenom());
         staff.setEmail(staffdto.getEmail());
@@ -44,6 +45,7 @@ public class StaffService {
     }
 
     public void deleteById(Long id) {
-        staffRepository.deleteById(id);
+        Staff staff = staffRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Could not find staff with id: " + id));
+        staffRepository.delete(staff);
     }
 }
