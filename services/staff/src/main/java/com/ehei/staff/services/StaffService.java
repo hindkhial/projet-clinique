@@ -42,4 +42,8 @@ public class StaffService {
         staff.setTel(staffdto.getTel());
         return staffMapper.toResponseDto(staffRepository.save(staff));
     }
+
+    public void deleteById(Long id) {
+        staffRepository.deleteById(id);
+    }
 }

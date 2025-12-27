@@ -41,4 +41,10 @@ public class StaffController {
         StaffResponseDto response = staffService.update(Long.valueOf(id), staffdto);
         return ResponseEntity.ok().body(response);
     }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteStaff(@PathVariable String id){
+        staffService.deleteById(Long.valueOf(id));
+        return ResponseEntity.ok().body("Staff has been deleted");
+    }
 }
