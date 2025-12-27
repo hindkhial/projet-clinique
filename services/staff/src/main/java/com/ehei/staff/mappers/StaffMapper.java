@@ -14,8 +14,10 @@ public class StaffMapper {
         return Staff.builder()
                 .nom(dto.getNom())
                 .prenom(dto.getPrenom())
+                .email(dto.getEmail())
                 .role(dto.getRole())
                 .tel(dto.getTel())
+                .dateNaissance(dto.getDateNaissance())
                 .build();
     }
 
@@ -24,7 +26,9 @@ public class StaffMapper {
                 .id(staff.getId())
                 .nom(staff.getNom())
                 .prenom(staff.getPrenom())
+                .email(staff.getEmail())
                 .tel(staff.getTel())
+                .dateNaissance(staff.getDateNaissance())
                 .role(staff.getRole())
                 .build();
     }
