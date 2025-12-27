@@ -2,6 +2,7 @@ package com.ehei.staff.controllers;
 
 import com.ehei.staff.DTOS.Staff.StaffCreateRequestDto;
 import com.ehei.staff.DTOS.Staff.StaffResponseDto;
+import com.ehei.staff.DTOS.Staff.StaffUpdateRequestDto;
 import com.ehei.staff.models.Staff;
 import com.ehei.staff.services.StaffService;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +33,12 @@ public class StaffController {
     @GetMapping("/{id}")
     public ResponseEntity<StaffResponseDto> getStaffById(@PathVariable String id){
         StaffResponseDto response = staffService.getById(Long.valueOf(id));
+        return ResponseEntity.ok().body(response);
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<StaffResponseDto> updateStaff(@PathVariable String id, @RequestBody StaffUpdateRequestDto staffdto){
+        StaffResponseDto response = staffService.update(Long.valueOf(id), staffdto);
         return ResponseEntity.ok().body(response);
     }
 }

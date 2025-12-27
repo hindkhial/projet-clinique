@@ -2,6 +2,7 @@ package com.ehei.staff.services;
 
 import com.ehei.staff.DTOS.Staff.StaffCreateRequestDto;
 import com.ehei.staff.DTOS.Staff.StaffResponseDto;
+import com.ehei.staff.DTOS.Staff.StaffUpdateRequestDto;
 import com.ehei.staff.mappers.StaffMapper;
 import com.ehei.staff.models.Staff;
 import com.ehei.staff.repositorys.StaffRepository;
@@ -29,5 +30,16 @@ public class StaffService {
     public StaffResponseDto getById(Long id) {
         Staff staff = staffRepository.findById(id).orElse(new Staff());
         return staffMapper.toResponseDto(staff);
+    }
+
+    public StaffResponseDto update(Long id, StaffUpdateRequestDto staffdto) {
+        Staff staff = staffRepository.findById(id).orElseThrow(()-> new RuntimeException("Staff not found"));
+        staff.setNom(staffdto.getNom());
+        staff.setPrenom(staffdto.getPrenom());
+        staff.setEmail(staffdto.getEmail());
+        staff.setDateNaissance(staffdto.getDateNaissance());
+        staff.setRole(staffdto.getRole());
+        staff.setTel(staffdto.getTel());
+        return staffMapper.toResponseDto(staffRepository.save(staff));
     }
 }
