@@ -4,6 +4,7 @@ import com.ehei.staff.DTOS.Staff.StaffCreateRequestDto;
 import com.ehei.staff.DTOS.Staff.StaffResponseDto;
 import com.ehei.staff.DTOS.Staff.StaffUpdateRequestDto;
 import com.ehei.staff.DTOS.medecin.MedecinCreateRequestDto;
+import com.ehei.staff.enums.Role;
 import com.ehei.staff.exceptions.EmailAlreadyExistException;
 import com.ehei.staff.exceptions.EntityNotFoundException;
 import com.ehei.staff.mappers.StaffMapper;
