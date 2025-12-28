@@ -2,5 +2,5 @@ package com.ehei.staff.enums;
 
 public enum Specialite {
     GENERALISTE,
-    Radiologue,
+    RADIOLOGUE,
 }
