@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.InputStream;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,8 @@ public class RapportService {
 
     private final RapportRepository rapportRepository;
     private final RapportMapper rapportMapper;
+    private final PdfGeneratorService pdfGeneratorService;
+    private final MinioService minioService;
 
     //creation du rapport
     @Transactional
@@ -105,5 +108,39 @@ public class RapportService {
         return rapports.stream()
                 .map(rapportMapper::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public RapportResponse generatePdf(Long id) {
+        log.info("generation du rapport PDF: {}", id);
+
+        Rapport rapport = rapportRepository.findById(id)
+                .orElseThrow(() -> new RapportNotFoundException(id));
+
+        // Generate PDF
+        InputStream pdfStream = pdfGeneratorService.generatePdf(rapport);
+
+        // Upload to MinIO
+        String pdfUrl = minioService.uploadPdf(pdfStream, rapport.getId());
+
+        // Update rapport
+        rapport.setPdfFileUrl(pdfUrl);
+        Rapport updated = rapportRepository.save(rapport);
+
+        log.info("PDF generated: {}", pdfUrl);
+
+        return rapportMapper.toResponse(updated);
+    }
+
+    private void validateRequest(CreateRapportRequest request) {
+        if (request.getPatientId() == null || request.getPatientId() <= 0) {
+            throw new InvalidRapportException("Invalid patient ID");
+        }
+        if (request.getMedecinId() == null || request.getMedecinId() <= 0) {
+            throw new InvalidRapportException("Invalid medecin ID");
+        }
+        if (request.getDateRapport() == null) {
+            throw new InvalidRapportException("Date est Obligatoire");
+        }
     }
 }

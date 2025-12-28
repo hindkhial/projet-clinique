@@ -41,6 +41,7 @@ public class RapportMapper {
                 .traitement(rapport.getTraitement())
                 .diagnostic(rapport.getDiagnostic())
                 .consultationId(rapport.getConsultationId())
+                .pdfFileUrl(rapport.getPdfFileUrl())
                 .createdAt(rapport.getCreatedAt())
                 .updatedAt(rapport.getUpdatedAt())
                 .build();

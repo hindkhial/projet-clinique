@@ -28,6 +28,7 @@ public class RapportResponse {
     private String traitement;
     private String diagnostic;
     private Long consultationId;
+    private String pdfFileUrl;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -56,6 +56,9 @@ public class Rapport {
     // Référence à la consultation source (optionnel)
     private Long consultationId;
 
+    //url du fichier PDF dans MinIO
+    private String pdfFileUrl;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
