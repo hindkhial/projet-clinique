@@ -47,6 +47,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.error(errors));
     }
 
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGlobalException(Exception ex) {
         return ResponseEntity

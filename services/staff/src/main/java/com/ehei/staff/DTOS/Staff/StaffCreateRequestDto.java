@@ -1,4 +1,5 @@
 package com.ehei.staff.DTOS.Staff;
+import com.ehei.staff.Validators.ValidStaffRole;
 import com.ehei.staff.enums.Role;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
@@ -36,5 +37,6 @@ public class StaffCreateRequestDto {
     private LocalDate dateNaissance;
 
     @NotNull(message = "role obligatoire")
+    @ValidStaffRole
     private Role role;
 }
