@@ -1,14 +1,17 @@
 package com.ehei.rapport.service;
 
+
 import com.ehei.rapport.dto.CreateRapportRequest;
 import com.ehei.rapport.dto.RapportResponse;
+import com.ehei.rapport.exception.InvalidRapportException;
+import com.ehei.rapport.exception.RapportNotFoundException;
 import com.ehei.rapport.mapper.RapportMapper;
 import com.ehei.rapport.model.Rapport;
 import com.ehei.rapport.repository.RapportRepository;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -21,25 +24,40 @@ public class RapportService {
     private final RapportRepository rapportRepository;
     private final RapportMapper rapportMapper;
 
-    //creation du Rapport
+    //creation du rapport
     @Transactional
     public RapportResponse createRapport(CreateRapportRequest request) {
-        log.info("Creation d'un nouveau rapport pour patient: {}", request.getPatientId());
+        log.info("creation d'un nouveau rapport pour patient: {}", request.getPatientId());
+
+        //validation
+        if (request.getPatientId() == null || request.getPatientId() <= 0) {
+            throw new InvalidRapportException("Patient ID est invalide");
+        }
+
+        if (request.getMedecinId() == null || request.getMedecinId() <= 0) {
+            throw new InvalidRapportException("Medecin ID est invalide");
+        }
+
+        if (request.getDateRapport() == null) {
+            throw new InvalidRapportException("Date du rapport est obligatoire");
+        }
 
         Rapport rapport = rapportMapper.toEntity(request);
 
         Rapport savedRapport = rapportRepository.save(rapport);
 
-        log.info("Rapport cree avec succes ID: {}", savedRapport.getId());
+        log.info("Rapport cree avec succes - ID: {}", savedRapport.getId());
 
         return rapportMapper.toResponse(savedRapport);
     }
 
-
-    //lister les rapport d'un patient
-    @Transactional
+    @Transactional(readOnly = true)
     public List<RapportResponse> getRapportsByPatient(Long patientId) {
-        log.info("Recuperation des rapports du patient: {}", patientId);
+        log.info("recuperation des rapports du patient: {}", patientId);
+
+        if (patientId == null || patientId <= 0) {
+            throw new InvalidRapportException("Patient ID est invalide");
+        }
 
         List<Rapport> rapports = rapportRepository.findByPatientId(patientId);
 
@@ -48,10 +66,14 @@ public class RapportService {
                 .collect(Collectors.toList());
     }
 
-    //lister les rapports d'un medecin
-    @Transactional
+
+    @Transactional(readOnly = true)
     public List<RapportResponse> getRapportsByMedecin(Long medecinId) {
-        log.info("Recuperation des rapports du medecin: {}", medecinId);
+        log.info("recuperation des rapports du medecin: {}", medecinId);
+
+        if (medecinId == null || medecinId <= 0) {
+            throw new InvalidRapportException("Medecin ID est invalide");
+        }
 
         List<Rapport> rapports = rapportRepository.findByMedecinId(medecinId);
 
@@ -60,21 +82,23 @@ public class RapportService {
                 .collect(Collectors.toList());
     }
 
-    //select un rapport d'apres rapportID
-    @Transactional
+    @Transactional(readOnly = true)
     public RapportResponse getRapportById(Long id) {
-        log.info("Récupération du rapport: {}", id);
+        log.info("Recuperation du rapport: {}", id);
+
+        if (id == null || id <= 0) {
+            throw new InvalidRapportException("Rapport ID est invalide");
+        }
 
         Rapport rapport = rapportRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Rapport non trouvé avec ID: " + id));
+                .orElseThrow(() -> new RapportNotFoundException(id));
 
         return rapportMapper.toResponse(rapport);
     }
 
-    //lister tous les rapports
-    @Transactional
+    @Transactional(readOnly = true)
     public List<RapportResponse> getAllRapports() {
-        log.info("Récupération de tous les rapports");
+        log.info("recuperation de tous les rapports");
 
         List<Rapport> rapports = rapportRepository.findAll();
 
