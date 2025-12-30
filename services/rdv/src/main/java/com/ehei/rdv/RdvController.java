@@ -2,12 +2,10 @@ package com.ehei.rdv;
 
 import com.ehei.rdv.DTO.RdvCreateRequestDto;
 import com.ehei.rdv.DTO.RdvResponseDto;
+import com.ehei.rdv.DTO.RdvUpdateRequestDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/rdv")
@@ -19,6 +17,13 @@ public class RdvController {
     @PostMapping("/create")
     public ResponseEntity<RdvResponseDto> createRdv(@RequestBody RdvCreateRequestDto requestDto){
         RdvResponseDto response = rdvService.createRdv(requestDto);
+        return ResponseEntity.ok().body(response);
+    }
+
+
+    @PostMapping("/update/{id}")
+    public ResponseEntity<RdvResponseDto> updateRdv(@PathVariable String id, @RequestBody RdvUpdateRequestDto requestDto){
+        RdvResponseDto response = rdvService.updateRdv(Long.valueOf(id), requestDto);
         return ResponseEntity.ok().body(response);
     }
 }
