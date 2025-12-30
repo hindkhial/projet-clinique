@@ -7,6 +7,8 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class RdvService {
@@ -29,5 +31,17 @@ public class RdvService {
         rdv.setDateRdv(requestDto.getDateRdv());
 
         return rdvMapper.toResponseDto(rdvRepository.save(rdv));
+    }
+
+    public List<RdvResponseDto> getAll() {
+        List<Rdv> rdvListe = rdvRepository.findAll();
+        return rdvMapper.toListeResponseDto(rdvListe);
+    }
+
+    public RdvResponseDto getById(Long id) {
+        Rdv rdv = rdvRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Aucun rdv n'existe avec id: " + id));
+
+        return rdvMapper.toResponseDto(rdv);
     }
 }

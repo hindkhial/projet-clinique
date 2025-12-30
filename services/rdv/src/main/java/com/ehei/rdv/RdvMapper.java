@@ -4,7 +4,8 @@ import com.ehei.rdv.DTO.RdvCreateRequestDto;
 import com.ehei.rdv.DTO.RdvResponseDto;
 import com.ehei.rdv.DTO.RdvUpdateRequestDto;
 import org.springframework.stereotype.Service;
-
+import java.util.ArrayList;
+import java.util.List;
 @Service
 public class RdvMapper {
     public Rdv toModel(RdvCreateRequestDto requestDto) {
@@ -31,5 +32,13 @@ public class RdvMapper {
                 .idMedecin(rdv.getIdMedecin())
                 .dateRdv(rdv.getDateRdv())
                 .build();
+    }
+
+    public List<RdvResponseDto> toListeResponseDto(List<Rdv> rdvListe) {
+        List<RdvResponseDto> toList = new ArrayList<>();
+        for (Rdv rdv : rdvListe) {
+            toList.add(toResponseDto(rdv));
+        }
+        return toList;
     }
 }
