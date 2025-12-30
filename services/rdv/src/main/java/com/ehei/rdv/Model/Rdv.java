@@ -1,4 +1,4 @@
-package com.ehei.rdv;
+package com.ehei.rdv.Model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

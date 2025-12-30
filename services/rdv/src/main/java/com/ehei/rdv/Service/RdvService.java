@@ -1,9 +1,12 @@
-package com.ehei.rdv;
+package com.ehei.rdv.Service;
 
 import com.ehei.rdv.DTO.RdvCreateRequestDto;
 import com.ehei.rdv.DTO.RdvResponseDto;
 import com.ehei.rdv.DTO.RdvUpdateRequestDto;
 import com.ehei.rdv.Exceptions.EntityNotFoundException;
+import com.ehei.rdv.Mapper.RdvMapper;
+import com.ehei.rdv.Model.Rdv;
+import com.ehei.rdv.Repository.RdvRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

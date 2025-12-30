@@ -1,8 +1,9 @@
-package com.ehei.rdv;
+package com.ehei.rdv.Controller;
 
 import com.ehei.rdv.DTO.RdvCreateRequestDto;
 import com.ehei.rdv.DTO.RdvResponseDto;
 import com.ehei.rdv.DTO.RdvUpdateRequestDto;
+import com.ehei.rdv.Service.RdvService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

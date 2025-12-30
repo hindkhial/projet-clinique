@@ -1,8 +1,9 @@
-package com.ehei.rdv;
+package com.ehei.rdv.Mapper;
 
 import com.ehei.rdv.DTO.RdvCreateRequestDto;
 import com.ehei.rdv.DTO.RdvResponseDto;
 import com.ehei.rdv.DTO.RdvUpdateRequestDto;
+import com.ehei.rdv.Model.Rdv;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;

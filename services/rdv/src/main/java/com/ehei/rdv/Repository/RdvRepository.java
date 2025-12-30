@@ -1,5 +1,6 @@
-package com.ehei.rdv;
+package com.ehei.rdv.Repository;
 
+import com.ehei.rdv.Model.Rdv;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 
