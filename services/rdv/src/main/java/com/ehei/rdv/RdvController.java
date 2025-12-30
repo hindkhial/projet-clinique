@@ -40,4 +40,10 @@ public class RdvController {
         RdvResponseDto response = rdvService.getById(Long.valueOf(id));
         return  ResponseEntity.ok().body(response) ;
     }
+
+    @GetMapping("/delete/{id}")
+    public ResponseEntity<String> deleteById(@PathVariable String id){
+        rdvService.deleteById(Long.valueOf(id));
+        return  ResponseEntity.ok().body("rdv supprime avec succes.");
+    }
 }

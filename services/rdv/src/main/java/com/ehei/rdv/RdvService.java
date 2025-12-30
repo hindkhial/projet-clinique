@@ -3,7 +3,7 @@ package com.ehei.rdv;
 import com.ehei.rdv.DTO.RdvCreateRequestDto;
 import com.ehei.rdv.DTO.RdvResponseDto;
 import com.ehei.rdv.DTO.RdvUpdateRequestDto;
-import jakarta.persistence.EntityNotFoundException;
+import com.ehei.rdv.Exceptions.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -43,5 +43,11 @@ public class RdvService {
                 .orElseThrow(() -> new EntityNotFoundException("Aucun rdv n'existe avec id: " + id));
 
         return rdvMapper.toResponseDto(rdv);
+    }
+
+    public void deleteById(Long id) {
+        Rdv rdv = rdvRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Aucun rdv n'existe avec id: " + id));
+        rdvRepository.delete(rdv);
     }
 }
