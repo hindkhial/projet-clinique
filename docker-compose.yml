@@ -174,11 +174,17 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://rapport-db:5432/rapportdb
       SPRING_DATASOURCE_USERNAME: rapportuser
       SPRING_DATASOURCE_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+      MINIO_URL: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:?Set MINIO_ACCESS_KEY in your local environment}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:?Set MINIO_SECRET_KEY in your local environment}
+      MINIO_BUCKET_NAME: rapport-bucket
     ports:
       - "9094:9094"
     depends_on:
       rapport-db:
         condition: service_healthy
+      minio:
+        condition: service_started
     networks:
       - microservices-network
 
@@ -268,8 +274,8 @@ services:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: ${MINIO_SECRET_KEY:?Set MINIO_SECRET_KEY in your local environment}
     ports:
-      - "9000:9000"      # API
-      - "9001:9001"      # MinIO Console - Web UI
+      - "9088:9000"      # API
+      - "9086:9001"      # MinIO Console - Web UI
     volumes:
       - minio-data:/data
     networks:
