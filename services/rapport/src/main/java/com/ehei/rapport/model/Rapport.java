@@ -1,0 +1,82 @@
+package com.ehei.rapport.model;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "rapports")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Rapport {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false)
+    private Long patientId;
+
+    @Column(nullable = false)
+    private Long medecinId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private TypeRapport typeRapport;
+
+    @Column(nullable = false)
+    private LocalDateTime dateRapport;
+
+    // Données Patient (dénormalisées)
+    private String patientNom;
+    private String patientPrenom;
+    private String patientEmail;
+    private String patientCin;
+
+    // Données Médecin (dénormalisées)
+    private String medecinNom;
+    private String medecinPrenom;
+    private String medecinSpecialite;
+
+    // Contenu du rapport
+    @Column(columnDefinition = "TEXT")
+    private String observations;
+
+    @Column(columnDefinition = "TEXT")
+    private String traitement;
+
+    @Column(columnDefinition = "TEXT")
+    private String diagnostic;
+
+    // Référence à la consultation source (optionnel)
+    private Long consultationId;
+
+    //url du fichier PDF dans MinIO
+    private String pdfFileUrl;
+
+    @Column(nullable = false, updatable = false)
+    private LocalDateTime createdAt;
+
+    @Column(nullable = false)
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
+}
+
+
+
+
