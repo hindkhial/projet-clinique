@@ -24,7 +24,7 @@ public class RdvController {
     }
 
 
-    @PostMapping("/update/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<RdvResponseDto> updateRdv(@PathVariable String id, @RequestBody RdvUpdateRequestDto requestDto){
         RdvResponseDto response = rdvService.updateRdv(Long.valueOf(id), requestDto);
         return ResponseEntity.ok().body(response);
@@ -42,7 +42,7 @@ public class RdvController {
         return  ResponseEntity.ok().body(response) ;
     }
 
-    @GetMapping("/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<String> deleteById(@PathVariable String id){
         rdvService.deleteById(Long.valueOf(id));
         return  ResponseEntity.ok().body("rdv supprime avec succes.");
