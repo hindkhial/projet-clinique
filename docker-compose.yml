@@ -56,7 +56,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # staff Service
+  # staff Servicegit
   staff-service:
     build: ./services/staff
     container_name: staff-service
