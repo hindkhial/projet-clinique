@@ -68,6 +68,14 @@ public class RapportController {
         return ResponseEntity.ok(rapport);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteRapport(@PathVariable Long id) {
+        log.info("DELETE rapport/{}", id);
+        rapportService.deleteRapport(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
     @GetMapping("/{id}/download")
     public ResponseEntity<InputStreamResource> downloadPdf(@PathVariable Long id) {
         log.info("GET /rapport/{}/download", id);
@@ -75,7 +83,7 @@ public class RapportController {
         // Get rapport
         RapportResponse rapport = rapportService.getRapportById(id);
 
-        // Check if PDF exists
+        // verifier si rapport exist
         if (rapport.getPdfFileUrl() == null) {
             return ResponseEntity.notFound().build();
         }
@@ -90,4 +98,8 @@ public class RapportController {
                 .body(new InputStreamResource(pdfStream));
     }
 
+    @GetMapping("/health")
+    public ResponseEntity<String> health() {
+        return ResponseEntity.ok("Rapport Service is running!");
+    }
 }

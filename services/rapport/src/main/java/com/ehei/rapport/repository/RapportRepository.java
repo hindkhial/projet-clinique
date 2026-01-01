@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface RapportRepository extends JpaRepository<Rapport, Long> {
 
+
     //lister les rapports d un patient
     List<Rapport> findByPatientId(Long patientId);
 

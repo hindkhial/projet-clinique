@@ -27,29 +27,32 @@ public class RapportService {
     private final PdfGeneratorService pdfGeneratorService;
     private final MinioService minioService;
 
-    //creation du rapport
+    //creation du rapport avec generation du PDF automatic
     @Transactional
     public RapportResponse createRapport(CreateRapportRequest request) {
         log.info("creation d'un nouveau rapport pour patient: {}", request.getPatientId());
 
         //validation
-        if (request.getPatientId() == null || request.getPatientId() <= 0) {
-            throw new InvalidRapportException("Patient ID est invalide");
-        }
-
-        if (request.getMedecinId() == null || request.getMedecinId() <= 0) {
-            throw new InvalidRapportException("Medecin ID est invalide");
-        }
-
-        if (request.getDateRapport() == null) {
-            throw new InvalidRapportException("Date du rapport est obligatoire");
-        }
+        validateRequest(request);
 
         Rapport rapport = rapportMapper.toEntity(request);
 
         Rapport savedRapport = rapportRepository.save(rapport);
 
         log.info("Rapport cree avec succes - ID: {}", savedRapport.getId());
+        try {
+            InputStream pdfStream = pdfGeneratorService.generatePdf(savedRapport);
+            String pdfUrl = minioService.uploadPdf(pdfStream, savedRapport.getId());
+
+            // Update rapport with PDF URL
+            savedRapport.setPdfFileUrl(pdfUrl);
+            savedRapport = rapportRepository.save(savedRapport);
+
+            log.info("PDF generer et uploader: {}", pdfUrl);
+        } catch (Exception e) {
+            log.error("PDF generation failed: {}", e.getMessage());
+
+        }
 
         return rapportMapper.toResponse(savedRapport);
     }
@@ -108,6 +111,32 @@ public class RapportService {
         return rapports.stream()
                 .map(rapportMapper::toResponse)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void deleteRapport(Long id){
+        log.info("suppression de rapport: {}", id);
+
+        if (id == null || id <= 0){
+            throw new InvalidRapportException("id rapport invalide");
+        }
+
+        Rapport rapport = rapportRepository.findById(id)
+                .orElseThrow(() -> new RapportNotFoundException(id));
+
+        if (rapport.getPdfFileUrl() != null) {
+            try {
+                minioService.deletePdf(rapport.getPdfFileUrl());
+                log.info("PDF supprimer dans MinIO");
+            } catch (Exception e) {
+                log.error("suppression du PDF dans MinIO echoue: {}", e.getMessage());
+            }
+        }
+
+        // Delete rapport from database
+        rapportRepository.deleteById(id);
+
+        log.info("✅ Rapport deleted: {}", id);
     }
 
     @Transactional
