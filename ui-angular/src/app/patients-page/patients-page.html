@@ -1,0 +1,56 @@
+<div class="card w-50 p-4 mx-auto mt-5">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <h3 class="card-title">Liste des patients</h3>
+    <a class="btn btn-primary mb-2 mt-2" routerLink="/patients/create">
+      Ajouter un Patient
+    </a>
+  </div>
+
+  @if (listePatients$ | async; as patients) {
+    @if (patients.length > 0) {
+      <table class="table table-striped">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>Nom</th>
+          <th>Prénom</th>
+          <th>Email</th>
+          <th>Téléphone</th>
+          <th>Date de naissance</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+          @for (patient of patients; track patient.id) {
+            <tr>
+              <td>{{ patient.id }}</td>
+              <td>{{ patient.nom }}</td>
+              <td>{{ patient.prenom }}</td>
+              <td>{{ patient.email }}</td>
+              <td>{{ patient.tel }}</td>
+              <td>{{ patient.dateNaissance | date: 'dd/MM/yyyy' }}</td>
+              <td>
+                <button class="btn btn-sm btn-secondary me-2">
+                  Modifier
+                </button>
+                <button class="btn btn-sm btn-danger">
+                  Supprimer
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    } @else {
+      <div class="alert alert-info">
+        Aucun patient trouvé
+      </div>
+    }
+  } @else {
+    <div class="text-center p-4">
+      <div class="spinner-border" role="status">
+        <span class="visually-hidden">Chargement...</span>
+      </div>
+    </div>
+  }
+</div>
