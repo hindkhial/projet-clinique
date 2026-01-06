@@ -1,12 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PatientService } from '../patient-service';
-import { PatientModel } from '../models/patient.model';
+import { PatientModel } from '../../models/patient.model';
 import { Observable, map } from 'rxjs';
+import {RouterModule} from '@angular/router';
 
 @Component({
   selector: 'app-patients-page',
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './patients-page.html',
   styleUrl: './patients-page.css',
 })

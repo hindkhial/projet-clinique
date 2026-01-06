@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import {Navbar} from './navbar/navbar';
-import {PatientsPage} from './patients-page/patients-page';
+import {PatientsPage} from './patients/patients-page/patients-page';
 
 @Component({
   selector: 'app-root',
