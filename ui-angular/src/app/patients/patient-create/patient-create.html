@@ -1,0 +1,133 @@
+<div class="card w-75 p-4 mx-auto mt-5">
+  <div class="card-header">
+    <h3 class="card-title">Ajouter un nouveau patient</h3>
+  </div>
+
+  <div class="card-body">
+    @if (errorMessage) {
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        {{ errorMessage }}
+        <button type="button" class="btn-close" (click)="errorMessage = ''"></button>
+      </div>
+    }
+
+    <form [formGroup]="patientForm" (ngSubmit)="onSubmit()">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="nom" class="form-label">Nom <span class="text-danger">*</span></label>
+          <input
+            type="text"
+            class="form-control"
+            id="nom"
+            formControlName="nom"
+            [class.is-invalid]="isFieldInvalid('nom')"
+            (input)="onFieldChange('nom')"
+            placeholder="Entrez le nom"
+          />
+          @if (isFieldInvalid('nom')) {
+            <div class="invalid-feedback">
+              {{ getErrorMessage('nom') }}
+            </div>
+          }
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label for="prenom" class="form-label">Prénom <span class="text-danger">*</span></label>
+          <input
+            type="text"
+            class="form-control"
+            id="prenom"
+            formControlName="prenom"
+            [class.is-invalid]="isFieldInvalid('prenom')"
+            (input)="onFieldChange('prenom')"
+            placeholder="Entrez le prénom"
+          />
+          @if (isFieldInvalid('prenom')) {
+            <div class="invalid-feedback">
+              {{ getErrorMessage('prenom') }}
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+          <input
+            type="email"
+            class="form-control"
+            id="email"
+            formControlName="email"
+            [class.is-invalid]="isFieldInvalid('email')"
+            (input)="onFieldChange('email')"
+            placeholder="exemple@email.com"
+          />
+          @if (isFieldInvalid('email')) {
+            <div class="invalid-feedback">
+              {{ getErrorMessage('email') }}
+            </div>
+          }
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label for="tel" class="form-label">Téléphone <span class="text-danger">*</span></label>
+          <input
+            type="tel"
+            class="form-control"
+            id="tel"
+            formControlName="tel"
+            [class.is-invalid]="isFieldInvalid('tel')"
+            (input)="onFieldChange('tel')"
+            placeholder="0612345678"
+          />
+          @if (isFieldInvalid('tel')) {
+            <div class="invalid-feedback">
+              {{ getErrorMessage('tel') }}
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="mb-3">
+        <label for="dateNaissance" class="form-label">Date de naissance <span class="text-danger">*</span></label>
+        <input
+          type="date"
+          class="form-control"
+          id="dateNaissance"
+          formControlName="dateNaissance"
+          [class.is-invalid]="isFieldInvalid('dateNaissance')"
+          (input)="onFieldChange('dateNaissance')"
+        />
+        @if (isFieldInvalid('dateNaissance')) {
+          <div class="invalid-feedback">
+            {{ getErrorMessage('dateNaissance') }}
+          </div>
+        }
+      </div>
+
+      <div class="d-flex justify-content-end gap-2 mt-4">
+        <button
+          type="button"
+          class="btn btn-secondary"
+          (click)="onCancel()"
+          [disabled]="isSubmitting"
+        >
+          Annuler
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="isSubmitting"
+        >
+          @if (isSubmitting) {
+            <span class="spinner-border spinner-border-sm me-2"></span>
+            Enregistrement...
+          } @else {
+            Enregistrer
+          }
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
