@@ -30,7 +30,9 @@
               <td>{{ patient.tel }}</td>
               <td>{{ patient.dateNaissance | date: 'dd/MM/yyyy' }}</td>
               <td>
-                <button class="btn btn-sm btn-secondary me-2">
+                <button
+                  class="btn btn-sm btn-secondary me-2"
+                  [routerLink]="['/patients/edit', patient.id]">
                   Modifier
                 </button>
                 <button class="btn btn-sm btn-danger">
