@@ -42,20 +42,20 @@ public class PatientService {
         Patient oldPatient = patientRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Aucun patient n'existe avec id: " + id));
 
-        Patient patient = new Patient();
-        patient.setNom(patientDto.getNom());
-        patient.setPrenom(patientDto.getPrenom());
-        patient.setEmail(patientDto.getEmail());
-        patient.setDateNaissance(patientDto.getDateNaissance());
-        patient.setTel(patientDto.getTel());
+        oldPatient.setNom(patientDto.getNom());
+        oldPatient.setPrenom(patientDto.getPrenom());
+        oldPatient.setEmail(patientDto.getEmail());
+        oldPatient.setDateNaissance(patientDto.getDateNaissance());
+        oldPatient.setTel(patientDto.getTel());
+
 
         //verifier si nouveau email n'existe pas
-        if (patientRepository.existsByEmail(patient.getEmail()) &&
-                !oldPatient.getEmail().equals(patient.getEmail())) {
-            throw new EmailAlreadyExistException(patient.getEmail());
+        if (patientRepository.existsByEmail(oldPatient.getEmail()) &&
+                !oldPatient.getEmail().equals(patientDto.getEmail())) {
+            throw new EmailAlreadyExistException(oldPatient.getEmail());
         }
 
-        return patientMapper.toResponseDto(patientRepository.save(patient));
+        return patientMapper.toResponseDto(patientRepository.save(oldPatient));
     }
 
     public void deleteById(Long id) {
