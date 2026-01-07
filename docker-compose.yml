@@ -286,6 +286,18 @@ services:
       timeout: 20s
       retries: 3
 
+  angular-ui:
+    build: ./ui-angular
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./ui-angular:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - CHOKIDAR_USEPOLLING=true
+    restart: unless-stopped
+    container_name: angular21-ui-dev
 
 #
 #  # API Gateway
