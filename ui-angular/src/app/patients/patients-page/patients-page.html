@@ -6,6 +6,14 @@
     </a>
   </div>
 
+  @if (deleteError) {
+    <div class="alert alert-danger alert-dismissible fade show m-3" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>
+      {{ deleteError }}
+      <button type="button" class="btn-close" (click)="deleteError = ''"></button>
+    </div>
+  }
+
   @if (listePatients$ | async; as patients) {
     @if (patients.length > 0) {
       <table class="table table-striped">
@@ -32,11 +40,20 @@
               <td>
                 <button
                   class="btn btn-sm btn-secondary me-2"
-                  [routerLink]="['/patients/edit', patient.id]">
-                  Modifier
+                  [routerLink]="['/patients/edit', patient.id]"
+                  [disabled]="deletingPatientId === patient.id">
+                  <i class="bi bi-pencil"></i> Modifier
                 </button>
-                <button class="btn btn-sm btn-danger">
-                  Supprimer
+                <button
+                  class="btn btn-sm btn-danger"
+                  (click)="onDelete(patient)"
+                  [disabled]="deletingPatientId === patient.id">
+                  @if (deletingPatientId === patient.id) {
+                    <span class="spinner-border spinner-border-sm me-1"></span>
+                    Suppression...
+                  } @else {
+                    <i class="bi bi-trash"></i> Supprimer
+                  }
                 </button>
               </td>
             </tr>
