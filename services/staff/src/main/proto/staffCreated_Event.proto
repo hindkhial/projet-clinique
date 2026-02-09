@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package staff.events;
+
+option java_multiple_files = true;
+
+message StaffCreatedEvent {
+  string staff_id = 1;
+  string nom = 2;
+  string prenom = 3;
+  string email = 4;
+  string role = 5;
+}
