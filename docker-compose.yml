@@ -282,6 +282,19 @@ services:
     networks:
       - microservices-network
 
+  notification-service:
+    build: ./services/notification
+    container_name: notification-service
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ports:
+      - "9096:9096"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - microservices-network
+
   ####
   # MinIO Object Storage
   minio:
