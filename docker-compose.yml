@@ -28,15 +28,18 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://patient-db:5432/patientdb
       SPRING_DATASOURCE_USERNAME: patientuser
       SPRING_DATASOURCE_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
       - "9090:9090"
     depends_on:
       patient-db:
         condition: service_healthy
+      kafka:
+        condition: service_healthy
     networks:
       - microservices-network
 
-#  # PostgreSQL for Staff Service
+  #  # PostgreSQL for Staff Service
   staff-db:
     image: postgres:15-alpine
     container_name: staff-db
@@ -56,7 +59,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # staff Servicegit
+  # staff Service
   staff-service:
     build: ./services/staff
     container_name: staff-service
@@ -64,10 +67,13 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://staff-db:5432/staffdb
       SPRING_DATASOURCE_USERNAME: staffuser
       SPRING_DATASOURCE_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
       - "9091:9091"
     depends_on:
       staff-db:
+        condition: service_healthy
+      kafka:
         condition: service_healthy
     networks:
       - microservices-network
@@ -100,10 +106,13 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://rdv-db:5432/rdvdb
       SPRING_DATASOURCE_USERNAME: rdvuser
       SPRING_DATASOURCE_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
       - "9092:9092"
     depends_on:
       rdv-db:
+        condition: service_healthy
+      kafka:
         condition: service_healthy
     networks:
       - microservices-network
@@ -136,10 +145,13 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://consultation-db:5432/consultationdb
       SPRING_DATASOURCE_USERNAME: consultationuser
       SPRING_DATASOURCE_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
       - "9093:9093"
     depends_on:
       consultation-db:
+        condition: service_healthy
+      kafka:
         condition: service_healthy
     networks:
       - microservices-network
@@ -178,6 +190,7 @@ services:
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:?Set MINIO_ACCESS_KEY in your local environment}
       MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:?Set MINIO_SECRET_KEY in your local environment}
       MINIO_BUCKET_NAME: rapport-bucket
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
       - "9094:9094"
     depends_on:
@@ -185,6 +198,8 @@ services:
         condition: service_healthy
       minio:
         condition: service_started
+      kafka:
+        condition: service_healthy
     networks:
       - microservices-network
 
@@ -212,7 +227,7 @@ services:
 
 
 
-# Keycloak
+  # Keycloak
   keycloak:
     image: quay.io/keycloak/keycloak:26.4.7
     container_name: keycloak
@@ -252,6 +267,7 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?Set KEYCLOAK_ADMIN_PASSWORD in your local environment}
       PATIENT_SERVICE_URL: http://patient-service:9090
       STAFF_SERVICE_URL: http://staff-service:9091
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
       - "9095:9095"
     depends_on:
@@ -261,10 +277,25 @@ services:
         condition: service_started
       staff-service:
         condition: service_started
+      kafka:
+        condition: service_healthy
     networks:
       - microservices-network
 
-####
+  notification-service:
+    build: ./services/notification
+    container_name: notification-service
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ports:
+      - "9096:9096"
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - microservices-network
+
+  ####
   # MinIO Object Storage
   minio:
     image: minio/minio:latest
@@ -285,6 +316,68 @@ services:
       interval: 30s
       timeout: 20s
       retries: 3
+
+  # Zookeeper for Kafka
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.0
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "2181"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Kafka Broker
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    container_name: kafka
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "9097:9097"      # External access
+      - "9098:9092"      # Internal access (mapped to host)
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9097
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+      KAFKA_LOG_RETENTION_HOURS: 168
+      KAFKA_LOG_SEGMENT_BYTES: 1073741824
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD", "kafka-broker-api-versions", "--bootstrap-server", "localhost:9092"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+
+  # Kafka UI (Optional - for monitoring)
+  kafka-ui:
+    image: provectuslabs/kafka-ui:latest
+    container_name: kafka-ui
+    depends_on:
+      kafka:
+        condition: service_healthy
+    ports:
+      - "9087:8080"
+    environment:
+      KAFKA_CLUSTERS_0_NAME: clinique-cluster
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+      KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+    networks:
+      - microservices-network
 
   angular-ui:
     build: ./ui-angular
