@@ -1,4 +1,15 @@
-FROM ubuntu:latest
-LABEL authors="hp"
+FROM eclipse-temurin:21-jdk-alpine
 
-ENTRYPOINT ["top", "-b"]
+WORKDIR /app
+
+COPY .mvn/ .mvn
+COPY mvnw pom.xml ./
+
+RUN ./mvnw dependency:go-offline
+
+COPY src ./src
+
+RUN ./mvnw clean package -DskipTests
+
+EXPOSE 9099
+ENTRYPOINT ["java", "-jar", "target/radio-0.0.1-SNAPSHOT.jar"]
