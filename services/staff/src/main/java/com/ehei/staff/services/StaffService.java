@@ -4,9 +4,9 @@ import com.ehei.staff.DTOS.Staff.StaffCreateRequestDto;
 import com.ehei.staff.DTOS.Staff.StaffResponseDto;
 import com.ehei.staff.DTOS.Staff.StaffUpdateRequestDto;
 import com.ehei.staff.DTOS.medecin.MedecinCreateRequestDto;
-import com.ehei.staff.enums.Role;
 import com.ehei.staff.exceptions.EmailAlreadyExistException;
 import com.ehei.staff.exceptions.EntityNotFoundException;
+import com.ehei.staff.kafka.KafkaProducer;
 import com.ehei.staff.mappers.StaffMapper;
 import com.ehei.staff.models.Staff;
 import com.ehei.staff.repositorys.StaffRepository;
@@ -20,13 +20,18 @@ import java.util.List;
 public class StaffService {
     private final StaffRepository staffRepository;
     private final StaffMapper staffMapper;
+    private final KafkaProducer kafkaProducer;
 
     public Staff CreateStaff(Staff newStaff){
 
         if (staffRepository.existsByEmail(newStaff.getEmail())) {
             throw new EmailAlreadyExistException(newStaff.getEmail());
         }
-        return staffRepository.save(newStaff) ;
+        Staff saved = staffRepository.save(newStaff) ;
+
+        kafkaProducer.sendEvent(saved);
+
+        return saved;
     }
 
     public List<StaffResponseDto> getAll() {
