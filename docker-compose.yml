@@ -292,6 +292,10 @@ services:
     container_name: notification-service
     environment:
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_CONSUMER_GROUP_ID: notification-service-group
+      SPRING_KAFKA_CONSUMER_KEY_DESERIALIZER: org.apache.kafka.common.serialization.StringDeserializer
+      SPRING_KAFKA_CONSUMER_VALUE_DESERIALIZER: org.apache.kafka.common.serialization.ByteArrayDeserializer
+      SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET: earliest
     ports:
       - "9096:9096"
     depends_on:
