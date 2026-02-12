@@ -1,7 +1,6 @@
 package com.ehei.radio.repository;
 
 import com.ehei.radio.model.Radio;
-
 import java.util.List;
 
 public interface RadioRepository {
