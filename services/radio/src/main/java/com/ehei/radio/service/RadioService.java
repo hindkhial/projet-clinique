@@ -1,9 +1,11 @@
 package com.ehei.radio.service;
 
+
 import com.ehei.radio.dto.CreateRadioRequest;
 import com.ehei.radio.dto.RadioResponse;
 import com.ehei.radio.exception.InvalidRadioException;
 import com.ehei.radio.exception.RadioNotFoundException;
+import com.ehei.radio.kafka.KafkaProducer;
 import com.ehei.radio.mapper.RadioMapper;
 import com.ehei.radio.model.Radio;
 import com.ehei.radio.repository.RadioRepository;
@@ -24,6 +26,7 @@ public class RadioService {
     private final RadioRepository radioRepository;
     private final RadioMapper radioMapper;
     private final MinioService minioService;
+    private final KafkaProducer kafkaProducer;
 
     @Transactional
     public RadioResponse createRadio(CreateRadioRequest request, MultipartFile file) {
@@ -39,6 +42,8 @@ public class RadioService {
             String fileUrl = minioService.uploadRadioImage(file, savedRadio.getId());
             savedRadio.setFichierRadioUrl(fileUrl);
             savedRadio = radioRepository.save(savedRadio);
+
+            kafkaProducer.sendRadioUploadedEvent(savedRadio);
 
             log.info("Radio cree avec succes - ID: {}", savedRadio.getId());
         } catch (Exception e) {
@@ -146,4 +151,3 @@ public class RadioService {
         }
     }
 }
-
