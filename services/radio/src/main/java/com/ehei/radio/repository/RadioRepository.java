@@ -1,15 +1,17 @@
 package com.ehei.radio.repository;
 
 import com.ehei.radio.model.Radio;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
 import java.util.List;
 
-public interface RadioRepository {
-    // Find all radios for a patient
+@Repository
+public interface RadioRepository extends JpaRepository<Radio, Long> {
+
+    // Trouver tous les radios d'un patient
     List<Radio> findByPatientId(Long patientId);
 
-    // Find all radios by a radiologue
+    // Trouver tous les radios d'un radiologue
     List<Radio> findByRadiologueId(Long radiologueId);
-
-    // Check if radio exists
-    boolean existsById(Long id);
 }
