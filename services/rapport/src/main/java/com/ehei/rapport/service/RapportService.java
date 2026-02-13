@@ -5,6 +5,7 @@ import com.ehei.rapport.dto.CreateRapportRequest;
 import com.ehei.rapport.dto.RapportResponse;
 import com.ehei.rapport.exception.InvalidRapportException;
 import com.ehei.rapport.exception.RapportNotFoundException;
+import com.ehei.rapport.kafka.KafkaProducer;
 import com.ehei.rapport.mapper.RapportMapper;
 import com.ehei.rapport.model.Rapport;
 import com.ehei.rapport.repository.RapportRepository;
@@ -26,6 +27,7 @@ public class RapportService {
     private final RapportMapper rapportMapper;
     private final PdfGeneratorService pdfGeneratorService;
     private final MinioService minioService;
+    private final KafkaProducer kafkaProducer;
 
     //creation du rapport avec generation du PDF automatic
     @Transactional
@@ -44,14 +46,15 @@ public class RapportService {
             InputStream pdfStream = pdfGeneratorService.generatePdf(savedRapport);
             String pdfUrl = minioService.uploadPdf(pdfStream, savedRapport.getId());
 
-            // Update rapport with PDF URL
             savedRapport.setPdfFileUrl(pdfUrl);
             savedRapport = rapportRepository.save(savedRapport);
+
+            // Envoie l'événement Kafka
+            kafkaProducer.sendRapportGeneratedEvent(savedRapport);
 
             log.info("PDF generer et uploader: {}", pdfUrl);
         } catch (Exception e) {
             log.error("PDF generation failed: {}", e.getMessage());
-
         }
 
         return rapportMapper.toResponse(savedRapport);
