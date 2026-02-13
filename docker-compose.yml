@@ -443,7 +443,7 @@ services:
       MINIO_BUCKET_NAME: radio-bucket
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
-      - "9096:9096"
+      - "9100:9100"
     depends_on:
       radio-db:
         condition: service_healthy
