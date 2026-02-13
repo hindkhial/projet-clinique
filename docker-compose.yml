@@ -454,6 +454,58 @@ services:
 #    networks:
 #      - microservices-network
 
+  # PostgreSQL for Radio Service
+  radio-db:
+    image: postgres:15-alpine
+    container_name: radio-db
+    environment:
+      POSTGRES_DB: radiodb
+      POSTGRES_USER: radiouser
+      POSTGRES_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+    ports:
+      - "5437:5432"
+    volumes:
+      - radio-data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U radiouser -d radiodb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Radio Service
+  radio-service:
+    build: ./services/radio
+    container_name: radio-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://radio-db:5432/radiodb
+      SPRING_DATASOURCE_USERNAME: radiouser
+      SPRING_DATASOURCE_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+      MINIO_URL: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:?Set MINIO_ACCESS_KEY in your local environment}
+      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:?Set MINIO_SECRET_KEY in your local environment}
+      MINIO_BUCKET_NAME: radio-bucket
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_PRODUCER_KEY_SERIALIZER: org.apache.kafka.common.serialization.StringSerializer
+      SPRING_KAFKA_PRODUCER_VALUE_SERIALIZER: org.apache.kafka.common.serialization.ByteArraySerializer
+      SPRING_KAFKA_PRODUCER_ACKS: all
+      SPRING_KAFKA_PRODUCER_RETRIES: 3
+
+
+    ports:
+      - "9100:9100"
+    depends_on:
+      radio-db:
+        condition: service_healthy
+      minio:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    networks:
+      - microservices-network
+
+
 volumes:
   patient-data:
   staff-data:
@@ -463,6 +515,7 @@ volumes:
   analyses-data:
   keycloak-data:
   minio-data:
+  radio-data:
 
 networks:
   microservices-network:

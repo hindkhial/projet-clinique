@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package radio.events;
+
+option java_multiple_files = true;
+
+message RadioUploadedEvent {
+  string radio_id = 1;
+  string patient_id = 2;
+  string radiologue_id = 3;
+  string fichier_radio_url = 4;
+  string date_radio = 5;
+  string notes = 6;
+}
