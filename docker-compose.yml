@@ -300,6 +300,46 @@ services:
     networks:
       - microservices-network
 
+  analyses-db:
+    image: postgres:15-alpine
+    container_name: analyses-db
+    environment:
+      POSTGRES_DB: analysesdb
+      POSTGRES_USER: analysesuser
+      POSTGRES_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+    ports:
+      - "5439:5432"
+    volumes:
+      - analyses-data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U patientuser -d patientdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+#skip 9097 et 9098 pour kafka
+
+  # analyses Service
+  analyses-service:
+    build: ./services/analyses
+    container_name: analyses-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://analyses-db:5432/analysesdb
+      SPRING_DATASOURCE_USERNAME: analysesuser
+      SPRING_DATASOURCE_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    ports:
+      - "9099:9099"
+    depends_on:
+      analyses-db:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - microservices-network
+
   ####
   # MinIO Object Storage
   minio:
@@ -420,6 +460,7 @@ volumes:
   rdv-data:
   consultation-data:
   rapport-data:
+  analyses-data:
   keycloak-data:
   minio-data:
 
