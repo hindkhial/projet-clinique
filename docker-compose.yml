@@ -303,7 +303,7 @@ services:
       POSTGRES_USER: analysesuser
       POSTGRES_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
     ports:
-      - "5438:5432"
+      - "5439:5432"
     volumes:
       - analyses-data:/var/lib/postgresql/data
     networks:
