@@ -1,6 +1,5 @@
 package com.ehei.radio.service;
 
-
 import com.ehei.radio.dto.CreateRadioRequest;
 import com.ehei.radio.dto.RadioResponse;
 import com.ehei.radio.exception.InvalidRadioException;
@@ -35,24 +34,32 @@ public class RadioService {
         validateRequest(request);
         validateFile(file);
 
+        // Ne pas sauvegarder encore, juste créer l'entité
         Radio radio = radioMapper.toEntity(request);
-        Radio savedRadio = radioRepository.save(radio);
+
+        // D'abord sauvegarder pour obtenir un ID
+        Radio tempRadio = radioRepository.save(radio);
+        Long radioId = tempRadio.getId();
 
         try {
-            String fileUrl = minioService.uploadRadioImage(file, savedRadio.getId());
-            savedRadio.setFichierRadioUrl(fileUrl);
-            savedRadio = radioRepository.save(savedRadio);
+            // Upload le fichier avec l'ID
+            String fileUrl = minioService.uploadRadioImage(file, radioId);
+
+            // Maintenant mettre à jour avec l'URL du fichier
+            tempRadio.setFichierRadioUrl(fileUrl);
+            Radio savedRadio = radioRepository.save(tempRadio);
 
             kafkaProducer.sendRadioUploadedEvent(savedRadio);
 
             log.info("Radio cree avec succes - ID: {}", savedRadio.getId());
+
+            return radioMapper.toResponse(savedRadio);
+
         } catch (Exception e) {
             log.error("Erreur lors de l'upload du fichier: {}", e.getMessage());
-            radioRepository.deleteById(savedRadio.getId());
+            radioRepository.deleteById(radioId);
             throw new InvalidRadioException("Erreur lors de l'upload du fichier radio");
         }
-
-        return radioMapper.toResponse(savedRadio);
     }
 
     @Transactional(readOnly = true)

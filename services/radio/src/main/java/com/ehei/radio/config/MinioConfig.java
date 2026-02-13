@@ -3,7 +3,6 @@ package com.ehei.radio.config;
 import io.minio.BucketExistsArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -14,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 public class MinioConfig {
 
     @Value("${minio.url}")
-    private String minioUrl;
+    private String url;
 
     @Value("${minio.access-key}")
     private String accessKey;
@@ -25,42 +24,44 @@ public class MinioConfig {
     @Value("${minio.bucket-name}")
     private String bucketName;
 
-    private MinioClient minioClient;
-
-
     @Bean
     public MinioClient minioClient() {
-        log.info("Creating MinIO client: {}", minioUrl);
+        log.info("Creation du client MinIO: {}", url);
 
-        this.minioClient = MinioClient.builder()
-                .endpoint(minioUrl)
+        MinioClient minioClient = MinioClient.builder()
+                .endpoint(url)
                 .credentials(accessKey, secretKey)
                 .build();
 
-        return this.minioClient;
+        // Initialiser le bucket immediatement apres la creation du client
+        initializeBucket(minioClient);
+
+        return minioClient;
     }
 
-
-    @PostConstruct
-    public void initBucket() {
+    private void initializeBucket(MinioClient minioClient) {
         try {
-            log.info("Checking if bucket '{}' exists...", bucketName);
+            log.info("Verification du bucket: {}", bucketName);
 
             boolean exists = minioClient.bucketExists(
-                    BucketExistsArgs.builder().bucket(bucketName).build()
+                    BucketExistsArgs.builder()
+                            .bucket(bucketName)
+                            .build()
             );
 
             if (!exists) {
                 minioClient.makeBucket(
-                        MakeBucketArgs.builder().bucket(bucketName).build()
+                        MakeBucketArgs.builder()
+                                .bucket(bucketName)
+                                .build()
                 );
-                log.info("Bucket created: {}", bucketName);
+                log.info("Bucket cree: {}", bucketName);
             } else {
-                log.info("Bucket already exists: {}", bucketName);
+                log.info("Bucket existe deja: {}", bucketName);
             }
 
         } catch (Exception e) {
-            log.error("Error creating bucket: {}", e.getMessage());
+            log.error("Erreur lors de la creation du bucket: {}", e.getMessage());
         }
     }
 }

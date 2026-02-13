@@ -29,7 +29,6 @@ public class Radio {
     private LocalDateTime dateRadio;
 
     // URL du fichier radio dans MinIO
-    @Column(nullable = false)
     private String fichierRadioUrl;
 
     // Informations patient (dénormalisées)
@@ -57,4 +56,3 @@ public class Radio {
         updatedAt = LocalDateTime.now();
     }
 }
-
