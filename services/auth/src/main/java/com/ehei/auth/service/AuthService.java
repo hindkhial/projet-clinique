@@ -2,8 +2,10 @@ package com.ehei.auth.service;
 
 import com.ehei.auth.DTOS.Staff.StaffAccountResult;
 import com.ehei.auth.DTOS.Staff.StaffCreateRequestDto;
+import com.ehei.auth.DTOS.Staff.StaffRegistrationRequest;
 import com.ehei.auth.DTOS.Staff.StaffResponseDto;
 import com.ehei.auth.feign.StaffFeignClient;
+import com.ehei.auth.mapper.StaffMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,23 +17,24 @@ public class AuthService {
 
     private final StaffFeignClient staffClient;
     private final KeycloakAdminService keycloakService;
+    private final StaffMapper staffMapper;
 
     public StaffAccountResult createStaffWithKeycloakAccount(
-            StaffCreateRequestDto staffRequest,
-            String password
+            StaffRegistrationRequest staffRegistrationRequest
     ) {
         StaffResponseDto staff = null;
 
         try {
             // 1. Créer le staff
-            staff = staffClient.createStaff(staffRequest).getData();
+            staff = staffClient.createStaff(staffMapper.toStaffCreateRequestDto(staffRegistrationRequest)).getData();
 
             // 2. Créer Keycloak
             String keycloakId = keycloakService.createUser(
                     staff.getEmail(),
                     staff.getPrenom(),
                     staff.getNom(),
-                    password
+                    staffRegistrationRequest.getPassword(),
+                    staff.getRole().toString()
             );
 
             return StaffAccountResult.success(staff, keycloakId);
