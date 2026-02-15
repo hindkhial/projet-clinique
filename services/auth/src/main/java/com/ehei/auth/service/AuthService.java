@@ -1,7 +1,6 @@
 package com.ehei.auth.service;
 
 import com.ehei.auth.DTOS.Staff.StaffAccountResult;
-import com.ehei.auth.DTOS.Staff.StaffCreateRequestDto;
 import com.ehei.auth.DTOS.Staff.StaffRegistrationRequest;
 import com.ehei.auth.DTOS.Staff.StaffResponseDto;
 import com.ehei.auth.feign.StaffFeignClient;
@@ -22,13 +21,13 @@ public class AuthService {
     public StaffAccountResult createStaffWithKeycloakAccount(
             StaffRegistrationRequest staffRegistrationRequest
     ) {
-        StaffResponseDto staff = null;
+        // 1. Créer le staff (si erreur, FeignException remonte directement)
+        StaffResponseDto staff = staffClient.createStaff(
+                staffMapper.toStaffCreateRequestDto(staffRegistrationRequest)
+        ).getData();
 
+        // 2. Créer Keycloak avec rollback en cas d'erreur
         try {
-            // 1. Créer le staff
-            staff = staffClient.createStaff(staffMapper.toStaffCreateRequestDto(staffRegistrationRequest)).getData();
-
-            // 2. Créer Keycloak
             String keycloakId = keycloakService.createUser(
                     staff.getEmail(),
                     staff.getPrenom(),
@@ -40,14 +39,17 @@ public class AuthService {
             return StaffAccountResult.success(staff, keycloakId);
 
         } catch (Exception e) {
-            // Si quelque chose échoue, supprimer le staff si créé
-            if (staff != null) {
-                try {
-                    staffClient.deleteStaff(staff.getId());
-                    log.info("Delete staff with id {}", staff.getId());
-                } catch (Exception ignored) {}
+            // Rollback: supprimer le staff créé
+            log.error("Erreur Keycloak, rollback du staff {}", staff.getId());
+
+            try {
+                staffClient.deleteStaff(staff.getId());
+                log.info("Staff {} supprimé avec succès", staff.getId());
+            } catch (Exception rollbackEx) {
+                log.error("ERREUR CRITIQUE: Impossible de supprimer le staff {}", staff.getId());
             }
-            throw new RuntimeException("Erreur: " + e.getMessage());
+
+            throw new RuntimeException("Erreur création compte Keycloak: " + e.getMessage());
         }
     }
 }

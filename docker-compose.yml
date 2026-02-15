@@ -257,13 +257,34 @@ services:
     restart: on-failure
 
 
-
+  #  # PostgreSQL for auth Service
+  auth-db:
+    image: postgres:15-alpine
+    container_name: auth-db
+    environment:
+      POSTGRES_DB: authdb
+      POSTGRES_USER: authuser
+      POSTGRES_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+    ports:
+      - "5440:5432"
+    volumes:
+      - auth-data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U staffuser -d staffdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # auth Service
   auth-service:
     build: ./services/auth
     container_name: auth-service
     environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/authdb
+      SPRING_DATASOURCE_USERNAME: authuser
+      SPRING_DATASOURCE_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
       KEYCLOAK_URL: http://keycloak:8080
       KEYCLOAK_REALM: hospital-realm
       KEYCLOAK_CLIENT_ID: auth-service-client
@@ -539,6 +560,7 @@ volumes:
   keycloak-data:
   minio-data:
   radio-data:
+  auth-data:
 
 networks:
   microservices-network:

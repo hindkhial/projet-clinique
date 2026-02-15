@@ -1,9 +1,8 @@
 package com.ehei.auth.controller;
 
+import com.ehei.auth.DTOS.ApiResponse;
 import com.ehei.auth.DTOS.Staff.StaffAccountResult;
-import com.ehei.auth.DTOS.Staff.StaffCreateRequestDto;
 import com.ehei.auth.DTOS.Staff.StaffRegistrationRequest;
-import com.ehei.auth.DTOS.Staff.StaffUpdateRequestDto;
 import com.ehei.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,17 +17,15 @@ public class AuthStaffController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<?> registerStaff(@Valid @RequestBody StaffRegistrationRequest request) {
-        try {
+    public ResponseEntity<ApiResponse<StaffAccountResult>> registerStaff(@Valid @RequestBody StaffRegistrationRequest request) {
 
-            StaffAccountResult result = authService.createStaffWithKeycloakAccount(request);
+        StaffAccountResult result = authService.createStaffWithKeycloakAccount(request);
 
-            return ResponseEntity.ok(result);
-
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        return ResponseEntity.ok(
+                ApiResponse.success(result, "Staff et compte créés avec succès")
+        );
     }
+
 
 
 }
