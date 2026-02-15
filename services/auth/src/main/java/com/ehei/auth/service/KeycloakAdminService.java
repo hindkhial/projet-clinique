@@ -93,4 +93,59 @@ public class KeycloakAdminService {
     public void deleteUser(String userId) {
         keycloak.realm(realm).users().get(userId).remove();
     }
+
+    public void updateUser(String keycloakUserId, String email, String prenom, String nom) {
+        try {
+            log.info("Mise à jour utilisateur Keycloak: {}", keycloakUserId);
+            log.debug("Nouvelles valeurs - Email: {}, Prénom: {}, Nom: {}", email, prenom, nom);
+
+            // 1. Récupérer l'utilisateur existant
+            UserRepresentation user = keycloak.realm(realm)
+                    .users()
+                    .get(keycloakUserId)
+                    .toRepresentation();
+
+            log.debug("Utilisateur actuel - Email: {}, Username: {}", user.getEmail(), user.getUsername());
+
+            // 2. Mettre à jour les informations
+            user.setEmail(email);
+            user.setFirstName(prenom);
+            user.setLastName(nom);
+
+            // 3. Sauvegarder les modifications
+            keycloak.realm(realm)
+                    .users()
+                    .get(keycloakUserId)
+                    .update(user);
+
+            log.info("Utilisateur Keycloak {} mis à jour", keycloakUserId);
+
+        } catch (jakarta.ws.rs.BadRequestException e) {
+            log.error("Erreur 400 Keycloak - Détails: {}", e.getResponse().readEntity(String.class));
+            throw new RuntimeException("Erreur mise à jour Keycloak: " + e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("Erreur mise à jour utilisateur Keycloak: {}", e.getMessage(), e);
+            throw new RuntimeException("Erreur mise à jour Keycloak: " + e.getMessage(), e);
+        }
+    }
+
+    public void updatePassword(String keycloakUserId, String newPassword) {
+        try {
+            CredentialRepresentation credential = new CredentialRepresentation();
+            credential.setType(CredentialRepresentation.PASSWORD);
+            credential.setValue(newPassword);
+            credential.setTemporary(false);
+
+            keycloak.realm(realm)
+                    .users()
+                    .get(keycloakUserId)
+                    .resetPassword(credential);
+
+            log.info("Mot de passe mis à jour pour utilisateur {}", keycloakUserId);
+
+        } catch (Exception e) {
+            log.error("Erreur mise à jour mot de passe: {}", e.getMessage());
+            throw new RuntimeException("Erreur mise à jour mot de passe: " + e.getMessage(), e);
+        }
+    }
 }

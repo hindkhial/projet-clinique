@@ -22,7 +22,7 @@ public interface StaffFeignClient {
     @DeleteMapping("/staff/delete/{id}")
     ApiResponse<String> deleteStaff(@PathVariable("id") Long id);
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<ApiResponse<StaffResponseDto>> updateStaff(@PathVariable String id,
-                                                                     @RequestBody StaffUpdateRequestDto staffdto);
+    @PutMapping("/staff/update/{id}")
+    ApiResponse<StaffResponseDto> updateStaff(@PathVariable String id,
+                                              @RequestBody StaffUpdateRequestDto staffdto);
 }
