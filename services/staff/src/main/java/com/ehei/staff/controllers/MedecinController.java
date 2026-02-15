@@ -1,5 +1,6 @@
 package com.ehei.staff.controllers;
 
+import com.ehei.staff.DTOS.ApiResponse;
 import com.ehei.staff.DTOS.medecin.MedecinCreateRequestDto;
 import com.ehei.staff.DTOS.medecin.MedecinResponseDto;
 import com.ehei.staff.DTOS.medecin.MedecinUpdateRequestDto;
@@ -19,33 +20,33 @@ public class MedecinController {
     private final MedecinService medecinService;
 
     @PostMapping("/create")
-    public ResponseEntity<MedecinResponseDto> createMedecin(@RequestBody @Valid MedecinCreateRequestDto requestDto){
+    public ResponseEntity<ApiResponse<MedecinResponseDto>> createMedecin(@RequestBody @Valid MedecinCreateRequestDto requestDto){
         MedecinResponseDto response = medecinService.createMedecin(requestDto);
-        return ResponseEntity.ok().body(response);
+        return ResponseEntity.ok().body(ApiResponse.success(response,"medecin creee avec succes."));
     }
 
     @GetMapping("/")
-    public ResponseEntity<List<MedecinResponseDto>> getAllMedecins(){
+    public ResponseEntity<ApiResponse<List<MedecinResponseDto>>> getAllMedecins(){
         List<MedecinResponseDto> response = medecinService.getAll();
-        return ResponseEntity.ok().body(response);
+        return ResponseEntity.ok().body(ApiResponse.success(response));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MedecinResponseDto> getMedecinById(@PathVariable String id){
+    public ResponseEntity<ApiResponse<MedecinResponseDto>> getMedecinById(@PathVariable String id){
         MedecinResponseDto response = medecinService.getById(Long.valueOf(id));
-        return ResponseEntity.ok().body(response);
+        return ResponseEntity.ok().body(ApiResponse.success(response));
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteMedecinById(@PathVariable String id){
+    public ResponseEntity<ApiResponse<String> > deleteMedecinById(@PathVariable String id){
         medecinService.deleteById(Long.valueOf(id));
-        return ResponseEntity.ok().body("Medecin successfully deleted");
+        return ResponseEntity.ok().body(ApiResponse.success("Medecin supprime avec succes"));
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<MedecinResponseDto> updateMedecinById(@PathVariable String id, @RequestBody @Valid MedecinUpdateRequestDto requestDto){
+    public ResponseEntity<ApiResponse<MedecinResponseDto> > updateMedecinById(@PathVariable String id, @RequestBody @Valid MedecinUpdateRequestDto requestDto){
         MedecinResponseDto response = medecinService.updateById(Long.valueOf(id), requestDto);
-        return ResponseEntity.ok().body(response);
+        return ResponseEntity.ok().body(ApiResponse.success(response,"Medecin modifie avec succes."));
     }
 
 }
