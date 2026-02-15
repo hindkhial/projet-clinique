@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -51,7 +52,6 @@ public class KeycloakAdminService {
         user.setLastName(lastName);
         user.setEnabled(true);
 
-
         Response response = keycloak.realm(realm).users().create(user);
 
         if (response.getStatus() != 201) {
@@ -69,35 +69,63 @@ public class KeycloakAdminService {
 
         keycloak.realm(realm).users().get(userId).resetPassword(credential);
 
+        // Assigner le rôle
         assignRoleToUser(userId, role);
+
+        log.info("Utilisateur créé avec succès - ID: {}, Email: {}, Rôle: {}", userId, email, role);
 
         return userId;
     }
 
     private void assignRoleToUser(String userId, String roleName) {
-        // Récupérer le rôle depuis le realm
-        RoleRepresentation role = keycloak.realm(realm)
-                .roles()
-                .get(roleName)
-                .toRepresentation();
+        try {
+            // Récupérer le rôle depuis le realm
+            RoleRepresentation role = keycloak.realm(realm)
+                    .roles()
+                    .get(roleName)
+                    .toRepresentation();
 
-        // Assigner le rôle à l'utilisateur
-        keycloak.realm(realm)
-                .users()
-                .get(userId)
-                .roles()
-                .realmLevel()
-                .add(Arrays.asList(role));
+            // Assigner le rôle à l'utilisateur
+            keycloak.realm(realm)
+                    .users()
+                    .get(userId)
+                    .roles()
+                    .realmLevel()
+                    .add(Arrays.asList(role));
+
+            log.info("Rôle {} assigné à l'utilisateur {}", roleName, userId);
+
+        } catch (Exception e) {
+            log.error("Erreur lors de l'assignation du rôle {} à l'utilisateur {}: {}",
+                    roleName, userId, e.getMessage());
+            throw new RuntimeException("Erreur assignation rôle: " + e.getMessage(), e);
+        }
     }
 
     public void deleteUser(String userId) {
-        keycloak.realm(realm).users().get(userId).remove();
+        try {
+            keycloak.realm(realm).users().get(userId).remove();
+            log.info("Utilisateur {} supprimé avec succès", userId);
+        } catch (Exception e) {
+            log.error("Erreur suppression utilisateur {}: {}", userId, e.getMessage());
+            throw new RuntimeException("Erreur suppression utilisateur: " + e.getMessage(), e);
+        }
     }
 
-    public void updateUser(String keycloakUserId, String email, String prenom, String nom) {
+    /**
+     * Met à jour un utilisateur Keycloak (informations personnelles + rôle)
+     *
+     * @param keycloakUserId ID Keycloak de l'utilisateur
+     * @param email Nouvel email
+     * @param prenom Nouveau prénom
+     * @param nom Nouveau nom
+     * @param newRole Nouveau rôle (obligatoire pour garantir la cohérence)
+     */
+    public void updateUser(String keycloakUserId, String email, String prenom, String nom, String newRole) {
         try {
             log.info("Mise à jour utilisateur Keycloak: {}", keycloakUserId);
-            log.debug("Nouvelles valeurs - Email: {}, Prénom: {}, Nom: {}", email, prenom, nom);
+            log.debug("Nouvelles valeurs - Email: {}, Prénom: {}, Nom: {}, Rôle: {}",
+                    email, prenom, nom, newRole);
 
             // 1. Récupérer l'utilisateur existant
             UserRepresentation user = keycloak.realm(realm)
@@ -107,7 +135,7 @@ public class KeycloakAdminService {
 
             log.debug("Utilisateur actuel - Email: {}, Username: {}", user.getEmail(), user.getUsername());
 
-            // 2. Mettre à jour les informations
+            // 2. Mettre à jour les informations personnelles
             user.setEmail(email);
             user.setFirstName(prenom);
             user.setLastName(nom);
@@ -118,7 +146,12 @@ public class KeycloakAdminService {
                     .get(keycloakUserId)
                     .update(user);
 
-            log.info("Utilisateur Keycloak {} mis à jour", keycloakUserId);
+            log.info("Informations personnelles mises à jour pour l'utilisateur {}", keycloakUserId);
+
+            // 4. Mettre à jour le rôle
+            updateUserRole(keycloakUserId, newRole);
+
+            log.info("Utilisateur Keycloak {} complètement mis à jour", keycloakUserId);
 
         } catch (jakarta.ws.rs.BadRequestException e) {
             log.error("Erreur 400 Keycloak - Détails: {}", e.getResponse().readEntity(String.class));
@@ -126,6 +159,52 @@ public class KeycloakAdminService {
         } catch (Exception e) {
             log.error("Erreur mise à jour utilisateur Keycloak: {}", e.getMessage(), e);
             throw new RuntimeException("Erreur mise à jour Keycloak: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Met à jour le rôle d'un utilisateur
+     * Supprime tous les anciens rôles realm-level et assigne le nouveau
+     *
+     * @param keycloakUserId ID Keycloak de l'utilisateur
+     * @param newRole Nouveau rôle à assigner
+     */
+    private void updateUserRole(String keycloakUserId, String newRole) {
+        try {
+            // 1. Récupérer les rôles actuels de l'utilisateur
+            List<RoleRepresentation> currentRoles = keycloak.realm(realm)
+                    .users()
+                    .get(keycloakUserId)
+                    .roles()
+                    .realmLevel()
+                    .listAll();
+
+            log.debug("Rôles actuels de l'utilisateur {}: {}", keycloakUserId,
+                    currentRoles.stream().map(RoleRepresentation::getName).toList());
+
+            // 2. Supprimer tous les anciens rôles
+            if (!currentRoles.isEmpty()) {
+                keycloak.realm(realm)
+                        .users()
+                        .get(keycloakUserId)
+                        .roles()
+                        .realmLevel()
+                        .remove(currentRoles);
+
+                log.info("Anciens rôles supprimés pour l'utilisateur {}", keycloakUserId);
+            }
+
+            // 3. Assigner le nouveau rôle
+            assignRoleToUser(keycloakUserId, newRole);
+
+            log.info("Rôle mis à jour: {} → {} pour l'utilisateur {}",
+                    currentRoles.isEmpty() ? "aucun" : currentRoles.get(0).getName(),
+                    newRole,
+                    keycloakUserId);
+
+        } catch (Exception e) {
+            log.error("Erreur mise à jour rôle pour utilisateur {}: {}", keycloakUserId, e.getMessage());
+            throw new RuntimeException("Erreur mise à jour rôle: " + e.getMessage(), e);
         }
     }
 
