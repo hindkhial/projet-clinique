@@ -17,7 +17,6 @@ public class RdvMapper {
                     .build();
     }
 
-
    public Rdv toModel(RdvUpdateRequestDto requestDto) {
         return Rdv.builder()
                 .idPatient(requestDto.getIdPatient())
