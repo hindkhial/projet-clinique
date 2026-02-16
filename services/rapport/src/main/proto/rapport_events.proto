@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package rapport.events;
+
+option java_multiple_files = true;
+
+message RapportGeneratedEvent {
+  string rapport_id = 1;
+  string patient_id = 2;
+  string medecin_id = 3;
+  string type_rapport = 4;
+  string pdf_file_url = 5;
+  string date_rapport = 6;
+}
