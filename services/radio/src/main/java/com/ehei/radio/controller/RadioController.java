@@ -5,6 +5,13 @@ import com.ehei.radio.dto.RadioResponse;
 import com.ehei.radio.service.MinioService;
 import com.ehei.radio.service.RadioService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
@@ -22,6 +29,7 @@ import java.util.List;
 @RequestMapping("/Radio")
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Radio Management", description = "APIs for managing radiology images and reports")
 public class RadioController {
 
     private final RadioService radioService;
@@ -29,8 +37,31 @@ public class RadioController {
     private final ObjectMapper objectMapper;
 
     @PostMapping("/Upload")
+    @Operation(
+            summary = "Upload a new radiology image",
+            description = "Uploads a radiology image file along with associated metadata to MinIO storage"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "201",
+                    description = "Radio successfully uploaded",
+                    content = @Content(schema = @Schema(implementation = RadioResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid input data or file format",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Error uploading radio to storage",
+                    content = @Content
+            )
+    })
     public ResponseEntity<RadioResponse> uploadRadio(
+            @Parameter(description = "Radio metadata as JSON string", required = true)
             @RequestParam("radioData") String radioDataJson,
+            @Parameter(description = "Radiology image file", required = true)
             @RequestParam("file") MultipartFile file) {
 
         log.info("POST /Radio/Upload - Upload d'un nouveau radio");
@@ -46,7 +77,25 @@ public class RadioController {
     }
 
     @GetMapping("/Patient/{id}")
-    public ResponseEntity<List<RadioResponse>> getRadiosByPatient(@PathVariable Long id) {
+    @Operation(
+            summary = "Get radios by patient",
+            description = "Retrieves all radiology images associated with a specific patient"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully retrieved patient's radios",
+                    content = @Content(schema = @Schema(implementation = List.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Patient not found",
+                    content = @Content
+            )
+    })
+    public ResponseEntity<List<RadioResponse>> getRadiosByPatient(
+            @Parameter(description = "ID of the patient", required = true)
+            @PathVariable Long id) {
         log.info("GET /Radio/Patient/{} - Recuperation des radios du patient", id);
 
         List<RadioResponse> radios = radioService.getRadiosByPatient(id);
@@ -54,7 +103,25 @@ public class RadioController {
     }
 
     @GetMapping("/Radiologue/{id}")
-    public ResponseEntity<List<RadioResponse>> getRadiosByRadiologue(@PathVariable Long id) {
+    @Operation(
+            summary = "Get radios by radiologist",
+            description = "Retrieves all radiology images assigned to a specific radiologist"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully retrieved radiologist's radios",
+                    content = @Content(schema = @Schema(implementation = List.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Radiologist not found",
+                    content = @Content
+            )
+    })
+    public ResponseEntity<List<RadioResponse>> getRadiosByRadiologue(
+            @Parameter(description = "ID of the radiologist", required = true)
+            @PathVariable Long id) {
         log.info("GET /Radio/Radiologue/{} - Recuperation des radios du radiologue", id);
 
         List<RadioResponse> radios = radioService.getRadiosByRadiologue(id);
@@ -62,7 +129,25 @@ public class RadioController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RadioResponse> getRadioById(@PathVariable Long id) {
+    @Operation(
+            summary = "Get radio by ID",
+            description = "Retrieves a specific radiology record by its ID"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully retrieved radio",
+                    content = @Content(schema = @Schema(implementation = RadioResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Radio not found",
+                    content = @Content
+            )
+    })
+    public ResponseEntity<RadioResponse> getRadioById(
+            @Parameter(description = "ID of the radio to retrieve", required = true)
+            @PathVariable Long id) {
         log.info("GET /Radio/{} - Recuperation du radio", id);
 
         RadioResponse radio = radioService.getRadioById(id);
@@ -70,6 +155,17 @@ public class RadioController {
     }
 
     @GetMapping("/")
+    @Operation(
+            summary = "Get all radios",
+            description = "Retrieves all radiology records in the system"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully retrieved all radios",
+                    content = @Content(schema = @Schema(implementation = List.class))
+            )
+    })
     public ResponseEntity<List<RadioResponse>> getAllRadios() {
         log.info("GET /Radio/ - Recuperation de tous les radios");
 
@@ -78,7 +174,25 @@ public class RadioController {
     }
 
     @GetMapping("/{id}/download")
-    public ResponseEntity<InputStreamResource> downloadRadioImage(@PathVariable Long id) {
+    @Operation(
+            summary = "Download radio image",
+            description = "Downloads the radiology image file from MinIO storage"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully downloaded radio image",
+                    content = @Content(mediaType = "image/jpeg")
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Radio or image file not found",
+                    content = @Content
+            )
+    })
+    public ResponseEntity<InputStreamResource> downloadRadioImage(
+            @Parameter(description = "ID of the radio to download", required = true)
+            @PathVariable Long id) {
         log.info("GET /Radio/{}/download - Telechargement de l'image radio", id);
 
         RadioResponse radio = radioService.getRadioById(id);
@@ -96,7 +210,30 @@ public class RadioController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRadio(@PathVariable Long id) {
+    @Operation(
+            summary = "Delete radio",
+            description = "Deletes a radiology record and its associated image file from storage"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "204",
+                    description = "Radio successfully deleted",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Radio not found",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Error deleting radio or image file",
+                    content = @Content
+            )
+    })
+    public ResponseEntity<Void> deleteRadio(
+            @Parameter(description = "ID of the radio to delete", required = true)
+            @PathVariable Long id) {
         log.info("DELETE /Radio/{} - Suppression du radio", id);
 
         radioService.deleteRadio(id);
@@ -104,8 +241,18 @@ public class RadioController {
     }
 
     @GetMapping("/health")
+    @Operation(
+            summary = "Health check",
+            description = "Checks if the Radio service is running"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Service is healthy",
+                    content = @Content(schema = @Schema(implementation = String.class))
+            )
+    })
     public ResponseEntity<String> health() {
         return ResponseEntity.ok("Radio Service is running");
     }
 }
-

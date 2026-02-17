@@ -2,6 +2,7 @@ package com.ehei.consultation;
 
 import com.ehei.consultation.dtos.ApiResponse;
 import com.ehei.consultation.dtos.ApiResponse.ErrorDetail;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -32,9 +33,19 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<String>> handleAny(Exception ex) {
+    public ResponseEntity<ApiResponse<Void>> handleGlobalException(
+            Exception ex,
+            HttpServletRequest request) {
+
+        String path = request.getRequestURI();
+
+        // Don't intercept swagger/api-docs requests
+        if (path.contains("/swagger-ui") || path.contains("/v3/api-docs")) {
+            throw new RuntimeException(ex); // Re-throw to let Spring/Springdoc handle it
+        }
+
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("Erreur interne: " + ex.getMessage()));
+                .body(ApiResponse.error("Erreur : " + ex.getMessage()));
     }
 }
