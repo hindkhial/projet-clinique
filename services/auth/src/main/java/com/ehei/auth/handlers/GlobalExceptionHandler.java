@@ -4,6 +4,7 @@ import com.ehei.auth.DTOS.ApiResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import feign.FeignException;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -93,10 +94,19 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<Void>> handleGlobalException(Exception ex) {
-        log.error("Erreur inattendue: {}", ex.getMessage(), ex);
+    public ResponseEntity<ApiResponse<Void>> handleGlobalException(
+            Exception ex,
+            HttpServletRequest request) {
+
+        String path = request.getRequestURI();
+
+        // Don't intercept swagger/api-docs requests
+        if (path.contains("/swagger-ui") || path.contains("/v3/api-docs")) {
+            throw new RuntimeException(ex); // Re-throw to let Spring/Springdoc handle it
+        }
+
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ApiResponse.error("Une erreur inattendue s'est produite"));
+                .body(ApiResponse.error("Erreur : " + ex.getMessage()));
     }
 }
