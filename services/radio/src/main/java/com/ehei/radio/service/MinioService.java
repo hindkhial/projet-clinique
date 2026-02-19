@@ -20,19 +20,15 @@ public class MinioService {
     @Value("${minio.bucket-name}")
     private String bucketName;
 
-
-    public String uploadRadioImage(MultipartFile file, Long radioId) {
+    public String uploadRadioImage(MultipartFile file, Long radioId, String sanitizedOriginalFilename) {
         try {
-            // Create unique filename
-            String originalFilename = file.getOriginalFilename();
-            String extension = originalFilename != null && originalFilename.contains(".")
-                    ? originalFilename.substring(originalFilename.lastIndexOf("."))
+            String extension = sanitizedOriginalFilename.contains(".")
+                    ? sanitizedOriginalFilename.substring(sanitizedOriginalFilename.lastIndexOf("."))
                     : "";
             String filename = "radio_" + radioId + "_" + UUID.randomUUID() + extension;
 
             log.info("Uploading radio image: {}", filename);
 
-            // Upload to MinIO
             minioClient.putObject(
                     PutObjectArgs.builder()
                             .bucket(bucketName)
@@ -42,9 +38,7 @@ public class MinioService {
                             .build()
             );
 
-            log.info("Radio image uploaded: {}", filename);
-
-            // Return URL (format: bucket/filename)
+            log.info("Radio image uploaded successfully: {}", filename);
             return bucketName + "/" + filename;
 
         } catch (Exception e) {
@@ -53,13 +47,10 @@ public class MinioService {
         }
     }
 
-
     public InputStream downloadRadioImage(String fileUrl) {
         try {
             String filename = fileUrl.substring(fileUrl.indexOf("/") + 1);
-
             log.info("Downloading radio image: {}", filename);
-
 
             InputStream stream = minioClient.getObject(
                     GetObjectArgs.builder()
@@ -68,8 +59,7 @@ public class MinioService {
                             .build()
             );
 
-            log.info("Radio image downloaded: {}", filename);
-
+            log.info("Radio image downloaded successfully: {}", filename);
             return stream;
 
         } catch (Exception e) {
@@ -78,13 +68,9 @@ public class MinioService {
         }
     }
 
-    /**
-     * Delete radio image from MinIO
-     */
     public void deleteRadioImage(String fileUrl) {
         try {
             String filename = fileUrl.substring(fileUrl.indexOf("/") + 1);
-
             log.info("Deleting radio image: {}", filename);
 
             minioClient.removeObject(
@@ -94,7 +80,7 @@ public class MinioService {
                             .build()
             );
 
-            log.info("Radio image deleted: {}", filename);
+            log.info("Radio image deleted successfully: {}", filename);
 
         } catch (Exception e) {
             log.error("Error deleting radio image: {}", e.getMessage());
@@ -102,4 +88,3 @@ public class MinioService {
         }
     }
 }
-
