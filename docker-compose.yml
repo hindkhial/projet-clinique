@@ -26,7 +26,7 @@ services:
     environment:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       KAFKA_CONSUMER_GROUP: ai-service-group
-      KAFKA_TOPIC_CONSUME: radio.uploaded
+      KAFKA_TOPIC_CONSUME: Radio_Uploaded
       KAFKA_TOPIC_PRODUCE: ai.prediction.done
       MINIO_ENDPOINT: minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:?Set MINIO_ACCESS_KEY in your local environment}
@@ -42,9 +42,8 @@ services:
     ports:
       - "8001:8001"
     volumes:
-      # Mount your model weights folder
-      # Put DenseNet121_final.pt and EfficientNetB3_final.pt in ./weights/
       - ./weights:/app/weights:ro
+      - ./services/ai-radio:/app
     depends_on:
       kafka:
         condition: service_healthy
