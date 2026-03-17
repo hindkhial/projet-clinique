@@ -7,6 +7,7 @@ import com.ehei.rdv.Exceptions.EntityNotFoundException;
 import com.ehei.rdv.Mapper.RdvMapper;
 import com.ehei.rdv.Model.Rdv;
 import com.ehei.rdv.Repository.RdvRepository;
+import com.ehei.rdv.kafka.KafkaProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,9 +18,12 @@ import java.util.List;
 public class RdvService {
     private final RdvRepository rdvRepository;
     private final RdvMapper rdvMapper;
+    private final KafkaProducer kafkaProducer;
+
 
     public RdvResponseDto createRdv(RdvCreateRequestDto requestDto) {
         Rdv rdv = rdvRepository.save(rdvMapper.toModel(requestDto));
+        kafkaProducer.sendEvent(rdv);
         return rdvMapper.toResponseDto(rdv);
     }
 
