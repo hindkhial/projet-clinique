@@ -3,24 +3,57 @@ package com.ehei.analyses.service;
 import com.ehei.analyses.dto.AnalyseCreateRequest;
 import com.ehei.analyses.dto.AnalyseResponse;
 import com.ehei.analyses.dto.AnalyseUpdateRequest;
+import com.ehei.analyses.events.AnalysesSubmittedEvent;
 import com.ehei.analyses.mapper.AnalyseMapper;
 import com.ehei.analyses.model.Analyse;
 import com.ehei.analyses.repository.AnalyseRepository;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 @Data
+@Slf4j
 public class AnalyseService {
 
     private final AnalyseRepository analyseRepository;
     private final AnalyseMapper analyseMapper;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public AnalyseResponse createAnalyse(AnalyseCreateRequest requestDto) {
+        // 1. Sauvegarder l'analyse
         Analyse analyse = analyseMapper.toModel(requestDto);
-        return analyseMapper.toResponseDto(analyseRepository.save(analyse));
+        Analyse savedAnalyse = analyseRepository.save(analyse);
+
+        // 2. Créer l'événement AnalysesSubmitted
+        AnalysesSubmittedEvent event = AnalysesSubmittedEvent.from(
+                savedAnalyse.getId(),
+                savedAnalyse.getPatientId(),
+                savedAnalyse.getAge(),
+                savedAnalyse.getSexe(),
+                savedAnalyse.getGlycemieJeun(),
+                savedAnalyse.getHemoglobine(),
+                savedAnalyse.getGlobulesBlancs(),
+                savedAnalyse.getCholesterolTotal(),
+                savedAnalyse.getCreatinine(),
+                savedAnalyse.getTensionSystolique(),
+                savedAnalyse.getTensionDiastolique(),
+                savedAnalyse.getFrequenceCardiaque(),
+                savedAnalyse.getTemperature(),
+                savedAnalyse.getImc(),
+                savedAnalyse.getDateAnalyse()
+        );
+
+        // 3. Publier l'événement vers Kafka
+        kafkaTemplate.send("analyses-events", event);
+        log.info("✅ Événement AnalysesSubmitted publié pour l'analyse ID: {} - Patient ID: {}",
+                savedAnalyse.getId(), savedAnalyse.getPatientId());
+
+        // 4. Retourner la réponse
+        return analyseMapper.toResponseDto(savedAnalyse);
     }
 
     public List<AnalyseResponse> getAll() {
