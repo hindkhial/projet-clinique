@@ -1,50 +1,14 @@
 syntax = "proto3";
 
-package com.ehei.events;
+package patient.events;
 
-option java_package = "com.ehei.events";
-option java_outer_classname = "PatientEventProto";
 option java_multiple_files = true;
 
-// ✅ Event envoyé par Patient → consommé par Analyses
 message PatientCreatedEvent {
-  string id            = 1;
+  string patient_id    = 1;
   string nom           = 2;
   string prenom        = 3;
   string email         = 4;
   string telephone     = 5;
-  string dateNaissance = 6;
-}
-
-// ✅ Event envoyé par Analyses → vers autres services
-message AnalysesSubmittedEvent {
-  // Métadonnées
-  string eventId   = 1;
-  string eventType = 2;
-  string timestamp = 3;
-
-  // Données de l'analyse
-  int64 analyseId = 4;
-  int64 patientId = 5;
-
-  // Données démographiques
-  int32  age  = 6;
-  string sexe = 7;
-
-  // Analyses sanguines
-  double glycemieJeun    = 8;
-  double hemoglobine     = 9;
-  double globulesBlancs  = 10;
-  double cholesterolTotal = 11;
-  double creatinine      = 12;
-
-  // Signes vitaux
-  double tensionSystolique  = 13;
-  double tensionDiastolique = 14;
-  double frequenceCardiaque = 15;
-  double temperature        = 16;
-  double imc                = 17;
-
-  // Date de l'analyse
-  string dateAnalyse = 18;
+  string date_naissance = 6;
 }
