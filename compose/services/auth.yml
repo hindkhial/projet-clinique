@@ -1,0 +1,61 @@
+services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4.7
+    container_name: keycloak
+    command: start-dev
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloak-db:5432/keycloakdb
+      KC_DB_USERNAME: keycloakuser
+      KC_DB_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?Set KEYCLOAK_ADMIN_PASSWORD in your local environment}
+      KC_HEALTH_ENABLED: true
+      KC_HOSTNAME_STRICT: false
+      KC_HTTP_ENABLED: true
+    ports:
+      - "9089:8080"
+    depends_on:
+      keycloak-db:
+        condition: service_started
+    networks:
+      - microservices-network
+    restart: on-failure
+
+  auth-service:
+    build: ../../services/auth
+    container_name: auth-service
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/authdb
+      SPRING_DATASOURCE_USERNAME: authuser
+      SPRING_DATASOURCE_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+      KEYCLOAK_URL: http://keycloak:8080
+      KEYCLOAK_REALM: hospital-realm
+      KEYCLOAK_CLIENT_ID: auth-service-client
+      KEYCLOAK_CLIENT_SECRET: ${KEYCLOAK_CLIENT_SECRET:?Set KEYCLOAK_CLIENT_SECRET in your local environment}
+      KEYCLOAK_ADMIN_USERNAME: admin
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD:?Set KEYCLOAK_ADMIN_PASSWORD in your local environment}
+      PATIENT_SERVICE_URL: http://patient-service:9090
+      STAFF_SERVICE_URL: http://staff-service:9091
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_PRODUCER_KEY_SERIALIZER: org.apache.kafka.common.serialization.StringSerializer
+      SPRING_KAFKA_PRODUCER_VALUE_SERIALIZER: org.apache.kafka.common.serialization.ByteArraySerializer
+      SPRING_KAFKA_PRODUCER_ACKS: all
+      SPRING_KAFKA_PRODUCER_RETRIES: 3
+      SPRING_KAFKA_CONSUMER_GROUP_ID: auth-service-group
+      SPRING_KAFKA_CONSUMER_KEY_DESERIALIZER: org.apache.kafka.common.serialization.StringDeserializer
+      SPRING_KAFKA_CONSUMER_VALUE_DESERIALIZER: org.apache.kafka.common.serialization.ByteArrayDeserializer
+      SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET: earliest
+    ports:
+      - "9095:9095"
+    depends_on:
+      auth-db:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+      kafka:
+        condition: service_healthy
+    networks:
+      - microservices-network
+
+

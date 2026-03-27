@@ -1,0 +1,23 @@
+services:
+  rapport-db:
+    image: postgres:15-alpine
+    container_name: rapport-db
+    environment:
+      POSTGRES_DB: rapportdb
+      POSTGRES_USER: rapportuser
+      POSTGRES_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+    ports:
+      - "5436:5432"
+    volumes:
+      - rapport-data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rapportuser -d rapportdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  rapport-data:
+

@@ -1,0 +1,31 @@
+services:
+  notification-service:
+    build: ../../services/notification
+    container_name: notification-service
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_PRODUCER_KEY_SERIALIZER: org.apache.kafka.common.serialization.StringSerializer
+      SPRING_KAFKA_PRODUCER_VALUE_SERIALIZER: org.apache.kafka.common.serialization.ByteArraySerializer
+      SPRING_KAFKA_PRODUCER_ACKS: all
+      SPRING_KAFKA_PRODUCER_RETRIES: 3
+      SPRING_KAFKA_CONSUMER_GROUP_ID: notification-service-group
+      SPRING_KAFKA_CONSUMER_KEY_DESERIALIZER: org.apache.kafka.common.serialization.StringDeserializer
+      SPRING_KAFKA_CONSUMER_VALUE_DESERIALIZER: org.apache.kafka.common.serialization.ByteArrayDeserializer
+      SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET: earliest
+      SPRING_MAIL_HOST: mailhog
+      SPRING_MAIL_PORT: 1025
+      SPRING_MAIL_USERNAME: ''
+      SPRING_MAIL_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_AUTH: false
+      SPRING_MAIL_PROPERTIES_MAIL_SMTP_STARTTLS_ENABLE: false
+    ports:
+      - "9096:9096"
+    depends_on:
+      kafka:
+        condition: service_healthy
+      mailhog:
+        condition: service_started
+    networks:
+      - microservices-network
+
+
