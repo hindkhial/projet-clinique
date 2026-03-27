@@ -1,0 +1,23 @@
+services:
+  rdv-db:
+    image: postgres:15-alpine
+    container_name: rdv-db
+    environment:
+      POSTGRES_DB: rdvdb
+      POSTGRES_USER: rdvuser
+      POSTGRES_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+    ports:
+      - "5434:5432"
+    volumes:
+      - rdv-data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rdvuser -d rdvdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  rdv-data:
+

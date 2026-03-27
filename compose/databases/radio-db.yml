@@ -1,0 +1,23 @@
+services:
+  radio-db:
+    image: postgres:15-alpine
+    container_name: radio-db
+    environment:
+      POSTGRES_DB: radiodb
+      POSTGRES_USER: radiouser
+      POSTGRES_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+    ports:
+      - "5437:5432"
+    volumes:
+      - radio-data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U radiouser -d radiodb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  radio-data:
+

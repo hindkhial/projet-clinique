@@ -1,0 +1,23 @@
+services:
+  staff-db:
+    image: postgres:15-alpine
+    container_name: staff-db
+    environment:
+      POSTGRES_DB: staffdb
+      POSTGRES_USER: staffuser
+      POSTGRES_PASSWORD: ${DEMO_DB_PASSWORD:?Set DEMO_DB_PASSWORD in your local environment}
+    ports:
+      - "5433:5432"
+    volumes:
+      - staff-data:/var/lib/postgresql/data
+    networks:
+      - microservices-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U staffuser -d staffdb"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  staff-data:
+
