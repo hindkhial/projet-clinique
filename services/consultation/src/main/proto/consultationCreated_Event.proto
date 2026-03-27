@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package consultation.events;
+
+option java_package = "consultation.events";
+option java_multiple_files = true;
+
+message ConsultationCreatedEvent {
+  int64 id = 1;
+  int64 idPatient = 2;
+  int64 idMedecin = 3;
+  int64 idRdv = 4;
+  string dateConsultation = 5;
+  string observation = 6;
+  string traitement = 7;
+
+}

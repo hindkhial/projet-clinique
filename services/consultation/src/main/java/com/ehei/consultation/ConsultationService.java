@@ -3,6 +3,7 @@ package com.ehei.consultation;
 import com.ehei.consultation.dtos.ConsultationCreateRequest;
 import com.ehei.consultation.dtos.ConsultationResponse;
 import com.ehei.consultation.dtos.ConsultationUpdateRequest;
+import com.ehei.consultation.kafka.KafkaProducer;
 import lombok.Data;
 import org.springframework.stereotype.Service;
 
@@ -15,13 +16,16 @@ public class ConsultationService {
 
     private final ConsultationRepository consultationRepository;
     private final ConsultationMapper consultationMapper;
+    private final KafkaProducer kafkaProducer;
 
     public ConsultationResponse create(ConsultationCreateRequest requestDto) {
         Consultation consultation = consultationMapper.toModel(requestDto);
         consultation.setDateConsultation(LocalDateTime.now());
-        return consultationMapper.toResponseDto(
-                consultationRepository.save(consultation)
-        );
+
+        Consultation savedConsultation = consultationRepository.save(consultation);
+
+        kafkaProducer.sendEvent(savedConsultation);
+        return consultationMapper.toResponseDto(savedConsultation);
     }
 
     public List<ConsultationResponse> getAll() {
