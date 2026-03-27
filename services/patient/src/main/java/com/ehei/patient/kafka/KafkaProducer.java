@@ -1,9 +1,9 @@
 package com.ehei.patient.kafka;
-import com.ehei.events.PatientCreatedEvent;
 import com.ehei.patient.model.Patient;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import patient.events.PatientCreatedEvent;
 
 @Slf4j
 @Service
@@ -17,7 +17,7 @@ public class KafkaProducer {
 
     public void sendPatientCreatedEvent(Patient patient) {
         PatientCreatedEvent event = PatientCreatedEvent.newBuilder()
-                .setId(patient.getId().toString())
+                .setPatientId(patient.getId().toString())
                 .setNom(patient.getNom())
                 .setPrenom(patient.getPrenom())
                 .setEmail(patient.getEmail())

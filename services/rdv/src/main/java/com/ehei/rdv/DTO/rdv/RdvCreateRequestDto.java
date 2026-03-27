@@ -15,15 +15,12 @@ import java.time.LocalDateTime;
 public class RdvCreateRequestDto {
 
     @NotNull(message = "patient obligatoire")
-    @NotBlank(message = "patient obligatoire")
     private Long idPatient;
 
     @NotNull(message = "medecin obligatoire")
-    @NotBlank(message = "medecin obligatoire")
     private Long idMedecin;
 
     @Future(message = "la date doit etre au future")
     @NotNull(message = "date obligatoire")
-    @NotBlank(message = "date obligatoire")
     private LocalDateTime dateRdv;
 }
