@@ -3,29 +3,37 @@ package com.ehei.analyses.service;
 import com.ehei.analyses.dto.AnalyseCreateRequest;
 import com.ehei.analyses.dto.AnalyseResponse;
 import com.ehei.analyses.dto.AnalyseUpdateRequest;
+import com.ehei.analyses.kafka.KafkaProducer;
 import com.ehei.analyses.mapper.AnalyseMapper;
 import com.ehei.analyses.model.Analyse;
 import com.ehei.analyses.repository.AnalyseRepository;
 import lombok.Data;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
 @Data
+@Slf4j
 public class AnalyseService {
 
     private final AnalyseRepository analyseRepository;
     private final AnalyseMapper analyseMapper;
+    private final KafkaProducer kafkaProducer; // ✅ KafkaProducer au lieu de KafkaTemplate
 
     public AnalyseResponse createAnalyse(AnalyseCreateRequest requestDto) {
         Analyse analyse = analyseMapper.toModel(requestDto);
-        return analyseMapper.toResponseDto(analyseRepository.save(analyse));
+        Analyse savedAnalyse = analyseRepository.save(analyse);
+
+        // ✅ Déléguer l'envoi au KafkaProducer
+        kafkaProducer.sendAnalysesSubmittedEvent(savedAnalyse);
+
+        return analyseMapper.toResponseDto(savedAnalyse);
     }
 
     public List<AnalyseResponse> getAll() {
-        List<Analyse> analyseListe = analyseRepository.findAll();
-        return analyseMapper.toResponseDto(analyseListe);
+        return analyseMapper.toResponseDto(analyseRepository.findAll());
     }
 
     public AnalyseResponse getById(Long id) {

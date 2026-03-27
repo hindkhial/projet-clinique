@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package analyses.events;
+
+option java_multiple_files = true;
+
+message AnalysesSubmittedEvent {
+  string event_id   = 1;
+  string event_type = 2;
+  string timestamp  = 3;
+
+  int64 analyse_id  = 4;
+  int64 patient_id  = 5;
+
+  int32  age  = 6;
+  string sexe = 7;
+
+  double glycemie_jeun     = 8;
+  double hemoglobine       = 9;
+  double globules_blancs   = 10;
+  double cholesterol_total = 11;
+  double creatinine        = 12;
+
+  double tension_systolique  = 13;
+  double tension_diastolique = 14;
+  double frequence_cardiaque = 15;
+  double temperature         = 16;
+  double imc                 = 17;
+
+  string date_analyse = 18;
+}
