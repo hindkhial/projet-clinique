@@ -2,7 +2,10 @@ package com.ehei.rdv.Handler;
 
 
 import com.ehei.rdv.DTO.ApiResponse;
+import com.ehei.rdv.Exceptions.CreneauIndisponibleException;
 import com.ehei.rdv.Exceptions.EntityNotFoundException;
+import com.ehei.rdv.Exceptions.MedecinNotFoundException;
+import com.ehei.rdv.Exceptions.PatientNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -54,5 +57,20 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(ApiResponse.error("Erreur : " + ex.getMessage()));
+    }
+
+    @ExceptionHandler(PatientNotFoundException.class)
+    public ResponseEntity<String> handlePatientNotFound(PatientNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(MedecinNotFoundException.class)
+    public ResponseEntity<String> handleMedecinNotFound(MedecinNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(CreneauIndisponibleException.class)
+    public ResponseEntity<String> handleCreneau(CreneauIndisponibleException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
 }
