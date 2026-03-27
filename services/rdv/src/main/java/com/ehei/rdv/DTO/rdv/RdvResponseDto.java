@@ -1,4 +1,4 @@
-package com.ehei.rdv.DTO;
+package com.ehei.rdv.DTO.rdv;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,8 +1,8 @@
 package com.ehei.rdv.Controller;
 
-import com.ehei.rdv.DTO.RdvCreateRequestDto;
-import com.ehei.rdv.DTO.RdvResponseDto;
-import com.ehei.rdv.DTO.RdvUpdateRequestDto;
+import com.ehei.rdv.DTO.rdv.RdvCreateRequestDto;
+import com.ehei.rdv.DTO.rdv.RdvResponseDto;
+import com.ehei.rdv.DTO.rdv.RdvUpdateRequestDto;
 import com.ehei.rdv.Service.RdvService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
