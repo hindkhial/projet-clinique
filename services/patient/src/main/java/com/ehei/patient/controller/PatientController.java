@@ -1,10 +1,16 @@
 package com.ehei.patient.controller;
 
-import com.ehei.patient.dto.ApiResponse;
 import com.ehei.patient.dto.PatientCreateRequeste;
 import com.ehei.patient.dto.PatientResponse;
 import com.ehei.patient.dto.PatientUpdateRequeste;
 import com.ehei.patient.service.PatientService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,39 +22,132 @@ import java.util.List;
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/patient")
+@Tag(name = "Patient Management", description = "APIs for managing patient records")
 public class PatientController {
 
     private final PatientService patientService;
 
     @PostMapping("/create")
-    public ResponseEntity<ApiResponse<PatientResponse>> create(@RequestBody @Valid PatientCreateRequeste patientDto){
+    @Operation(
+            summary = "Create a new patient",
+            description = "Creates a new patient record in the system"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Patient successfully created",
+                    content = @Content(schema = @Schema(implementation = PatientResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid input data or validation error",
+                    content = @Content
+            )
+    })
+    public ResponseEntity<com.ehei.patient.dto.ApiResponse<PatientResponse>> create(
+            @RequestBody @Valid PatientCreateRequeste patientDto
+    ){
         PatientResponse response = patientService.createPatient(patientDto);
-        return ResponseEntity.ok().body(ApiResponse.success(response,
+        return ResponseEntity.ok().body(com.ehei.patient.dto.ApiResponse.success(response,
                 "patient creee avec succes."));
     }
 
     @GetMapping("/")
-    public ResponseEntity<ApiResponse<List<PatientResponse>>> getAllPatients(){
+    @Operation(
+            summary = "Get all patients",
+            description = "Retrieves a list of all patients in the system"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully retrieved all patients",
+                    content = @Content(schema = @Schema(implementation = List.class))
+            )
+    })
+    public ResponseEntity<com.ehei.patient.dto.ApiResponse<List<PatientResponse>>> getAllPatients(){
         List<PatientResponse> response = patientService.getAll();
-        return ResponseEntity.ok().body(ApiResponse.success(response));
+        return ResponseEntity.ok().body(com.ehei.patient.dto.ApiResponse.success(response));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<PatientResponse>> getPatientById(@PathVariable String id){
+    @Operation(
+            summary = "Get patient by ID",
+            description = "Retrieves a specific patient by their ID"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully retrieved patient",
+                    content = @Content(schema = @Schema(implementation = PatientResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Patient not found",
+                    content = @Content
+            )
+    })
+    public ResponseEntity<com.ehei.patient.dto.ApiResponse<PatientResponse>> getPatientById(
+            @Parameter(description = "ID of the patient to retrieve", required = true)
+            @PathVariable String id
+    ){
         PatientResponse response = patientService.getById(Long.valueOf(id));
-        return ResponseEntity.ok().body(ApiResponse.success(response));
+        return ResponseEntity.ok().body(com.ehei.patient.dto.ApiResponse.success(response));
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<ApiResponse<PatientResponse>> updatePatient(@PathVariable String id, @RequestBody @Valid PatientUpdateRequeste patientDto){
+    @Operation(
+            summary = "Update patient information",
+            description = "Updates an existing patient's information by their ID"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Patient successfully updated",
+                    content = @Content(schema = @Schema(implementation = PatientResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "Invalid input data or validation error",
+                    content = @Content
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Patient not found",
+                    content = @Content
+            )
+    })
+    public ResponseEntity<com.ehei.patient.dto.ApiResponse<PatientResponse>> updatePatient(
+            @Parameter(description = "ID of the patient to update", required = true)
+            @PathVariable String id,
+            @RequestBody @Valid PatientUpdateRequeste patientDto
+    ){
         PatientResponse response = patientService.update(Long.valueOf(id), patientDto);
-        return ResponseEntity.ok().body(ApiResponse.success(response,
+        return ResponseEntity.ok().body(com.ehei.patient.dto.ApiResponse.success(response,
                 "Patient modifie avec succes."));
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<ApiResponse<String>> deletePatient(@PathVariable String id){
+    @Operation(
+            summary = "Delete patient",
+            description = "Deletes a patient record by their ID"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Patient successfully deleted",
+                    content = @Content(schema = @Schema(implementation = String.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Patient not found",
+                    content = @Content
+            )
+    })
+    public ResponseEntity<com.ehei.patient.dto.ApiResponse<String>> deletePatient(
+            @Parameter(description = "ID of the patient to delete", required = true)
+            @PathVariable String id
+    ){
         patientService.deleteById(Long.valueOf(id));
-        return ResponseEntity.ok().body(ApiResponse.success("patient supprime avec succes."));
+        return ResponseEntity.ok().body(com.ehei.patient.dto.ApiResponse.success("patient supprime avec succes."));
     }
 }

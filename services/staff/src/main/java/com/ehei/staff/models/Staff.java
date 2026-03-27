@@ -1,5 +1,6 @@
 package com.ehei.staff.models;
 
+import com.ehei.staff.config.CryptoConverter;
 import com.ehei.staff.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -18,10 +19,18 @@ public class Staff {
     @Id
     @GeneratedValue
     private Long id;
+    @Convert(converter = CryptoConverter.class)
     private String nom;
+
+    @Convert(converter = CryptoConverter.class)
     private String prenom;
+
+    @Convert(converter = CryptoConverter.class)
     private String email;
+
+    @Convert(converter = CryptoConverter.class)
     private String tel;
+
     private LocalDate dateNaissance;
 
     @Enumerated(EnumType.STRING)

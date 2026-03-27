@@ -1,4 +1,4 @@
-package com.ehei.rdv.DTO;
+package com.ehei.rdv.DTO.rdv;
 
 import jakarta.validation.constraints.Future;
 import jakarta.validation.constraints.NotBlank;
