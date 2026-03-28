@@ -1,4 +1,7 @@
 include:
+  #network
+  - compose/network/network.yml
+
   # Infrastructure
   - compose/infra/kafka.yml
   - compose/infra/storage.yml
@@ -27,7 +30,3 @@ include:
 
   # UI
   - compose/ui/angular.yml
-
-networks:
-  microservices-network:
-    driver: bridge
