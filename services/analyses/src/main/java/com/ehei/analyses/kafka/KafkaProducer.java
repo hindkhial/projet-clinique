@@ -1,7 +1,7 @@
 package com.ehei.analyses.kafka;
 
 import com.ehei.analyses.model.Analyse;
-import com.ehei.events.AnalysesSubmittedEvent;
+import com.ehei.analyses.proto.AnalysesSubmittedEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
