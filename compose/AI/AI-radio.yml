@@ -1,0 +1,40 @@
+
+  # AI Radio Microservice
+  services:
+    ai-service:
+      build: ../../AI-radio
+      container_name: ai-service
+      environment:
+        KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+        KAFKA_CONSUMER_GROUP: ai-service-group
+        KAFKA_TOPIC_CONSUME: Radio_Uploaded
+        KAFKA_TOPIC_PRODUCE: ai.prediction.done
+        MINIO_ENDPOINT: minio:9000
+        MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY:?Set MINIO_ACCESS_KEY in your local environment}
+        MINIO_SECRET_KEY: ${MINIO_SECRET_KEY:?Set MINIO_SECRET_KEY in your local environment}
+        MINIO_BUCKET_RADIO: radio-bucket
+        MINIO_BUCKET_HEATMAP: heatmap-bucket
+        MINIO_SECURE: "false"
+        MODEL_DENSENET_PATH: /app/weights/DenseNet121_final.pt
+        MODEL_EFFNET_PATH: /app/weights/EfficientNetB3_final.pt
+        DEVICE: cpu
+        APP_PORT: 8001
+        LOG_LEVEL: INFO
+      ports:
+        - "8001:8001"
+      volumes:
+        - ../../AI-radio/weights:/app/weights:ro
+      depends_on:
+        kafka:
+          condition: service_healthy
+        minio:
+          condition: service_started
+      networks:
+        - microservices-network
+      healthcheck:
+        test: [ "CMD", "curl", "-f", "http://localhost:8001/health" ]
+        interval: 30s
+        timeout: 10s
+        start_period: 60s    # give extra time for model loading
+        retries: 3
+      restart: on-failure

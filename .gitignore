@@ -32,4 +32,19 @@ Thumbs.db
 **/.env
 
 # Application properties with secrets
-**/application-local.properties
+**/application-local.properties*
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+
+# Virtual environments
+**/.venv/
+
+# Model weights
+**/*.pt
+**/*.pth
+**/*.ckpt
+AI-radio/weights/

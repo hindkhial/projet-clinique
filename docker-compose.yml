@@ -4,7 +4,7 @@ include:
 
   # Infrastructure
   - compose/infra/kafka.yml
-  - compose/infra/storage.yml
+  - compose/infra/minio.yml
   - compose/infra/mail.yml
 
   # Databases
@@ -16,6 +16,9 @@ include:
   - compose/databases/rapport-db.yml
   - compose/databases/analyses-db.yml
   - compose/databases/radio-db.yml
+
+  #AI
+  - compose/AI/AI-radio.yml
 
   # Services
   - compose/services/auth.yml
