@@ -9,14 +9,15 @@ RUN apt-get update && apt-get install -y \
     libxext6 \
     libxrender-dev \
     libgomp1 \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --timeout=1000 -r requirements.txt
 
 # Copy source code
-COPY *.py .
+COPY . .
 
 # Model weights are mounted via Docker volume
 # Place your .pt files in ./weights/ on the host

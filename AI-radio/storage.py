@@ -1,5 +1,4 @@
 import logging
-import uuid
 from io import BytesIO
 
 from minio import Minio

@@ -1,5 +1,4 @@
 import logging
-import asyncio
 
 from aiokafka import AIOKafkaConsumer, AIOKafkaProducer
 
