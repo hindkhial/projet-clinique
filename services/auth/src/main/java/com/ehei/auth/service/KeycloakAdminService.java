@@ -1,15 +1,25 @@
 package com.ehei.auth.service;
 
+import com.ehei.auth.DTOS.login.LoginResponse;
 import jakarta.annotation.PostConstruct;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
+import org.keycloak.OAuth2Constants;
 import org.keycloak.admin.client.Keycloak;
 import org.keycloak.admin.client.KeycloakBuilder;
+import org.keycloak.representations.AccessTokenResponse;
 import org.keycloak.representations.idm.CredentialRepresentation;
 import org.keycloak.representations.idm.RoleRepresentation;
 import org.keycloak.representations.idm.UserRepresentation;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 import java.util.List;
@@ -29,6 +39,9 @@ public class KeycloakAdminService {
 
     @Value("${keycloak.admin-password}")
     private String adminPassword;
+
+    @Value("${keycloak.client-id}")
+    private String clientId;
 
     private Keycloak keycloak;
 
@@ -225,6 +238,71 @@ public class KeycloakAdminService {
         } catch (Exception e) {
             log.error("Erreur mise à jour mot de passe: {}", e.getMessage());
             throw new RuntimeException("Erreur mise à jour mot de passe: " + e.getMessage(), e);
+        }
+    }
+
+    public LoginResponse login(String username, String password) {
+        try {
+            Keycloak userKeycloak = KeycloakBuilder.builder()
+                    .serverUrl(keycloakUrl)
+                    .realm(realm)
+                    .clientId(clientId)
+                    .username(username)
+                    .password(password)
+                    .grantType(OAuth2Constants.PASSWORD)
+                    .build();
+
+            AccessTokenResponse tokenResponse = userKeycloak.tokenManager().getAccessToken();
+
+            return new LoginResponse(
+                    tokenResponse.getToken(),
+                    tokenResponse.getRefreshToken(),
+                    tokenResponse.getExpiresIn()
+            );
+
+        } catch (Exception e) {
+            log.error("Erreur login pour {}: {}", username, e.getMessage());
+            throw new RuntimeException("Identifiants incorrects");
+        }
+    }
+
+    public LoginResponse refresh(String refreshToken) {
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+            MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+            body.add("grant_type", OAuth2Constants.REFRESH_TOKEN);
+            body.add("client_id", clientId);
+            body.add("refresh_token", refreshToken);
+
+            HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
+
+            String tokenUrl = keycloakUrl + "/realms/" + realm + "/protocol/openid-connect/token";
+
+            ResponseEntity<AccessTokenResponse> response = restTemplate.postForEntity(
+                    tokenUrl,
+                    entity,
+                    AccessTokenResponse.class
+            );
+
+            AccessTokenResponse tokenResponse = response.getBody();
+
+            if (tokenResponse == null) {
+                throw new RuntimeException("Refresh token invalide ou expiré");
+            }
+
+            return new LoginResponse(
+                    tokenResponse.getToken(),
+                    tokenResponse.getRefreshToken(),
+                    tokenResponse.getExpiresIn()
+            );
+
+        } catch (Exception e) {
+            log.error("Erreur refresh token: {}", e.getMessage());
+            throw new RuntimeException("Refresh token invalide ou expiré");
         }
     }
 }

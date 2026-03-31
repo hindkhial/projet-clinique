@@ -69,6 +69,7 @@ db-down:
 # ============================================================
 # Démarrer les dépendances d'un service spécifique (demarer les services localement)
 # ============================================================
+
 patient-up:
 	docker compose $(INFRA) $(DB_PAT) up -d
 

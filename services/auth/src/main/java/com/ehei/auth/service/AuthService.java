@@ -4,6 +4,9 @@ import com.ehei.auth.DTOS.Staff.StaffAccountResult;
 import com.ehei.auth.DTOS.Staff.StaffRegistrationRequest;
 import com.ehei.auth.DTOS.Staff.StaffResponseDto;
 import com.ehei.auth.DTOS.Staff.StaffUpdateRequestAuth;
+import com.ehei.auth.DTOS.login.LoginRequest;
+import com.ehei.auth.DTOS.login.LoginResponse;
+import com.ehei.auth.DTOS.login.RefreshRequest;
 import com.ehei.auth.DTOS.medecin.MedecinRegistrationRequest;
 import com.ehei.auth.DTOS.medecin.MedecinResponseDto;
 import com.ehei.auth.DTOS.medecin.MedecinUpdateRequestAuth;
@@ -360,5 +363,13 @@ public class AuthService {
         } catch (Exception rollbackEx) {
             log.error("ERREUR CRITIQUE: Impossible de supprimer le médecin {} lors du rollback", medecinId);
         }
+    }
+
+    public LoginResponse login(LoginRequest request) {
+        return keycloakService.login(request.getUsername(), request.getPassword());
+    }
+
+    public LoginResponse refresh(RefreshRequest request) {
+        return keycloakService.refresh(request.getRefreshToken());
     }
 }
