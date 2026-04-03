@@ -16,8 +16,7 @@ public class AnalysesKafkaConsumer {
 
     @KafkaListener(
             topics = "analyses-events",
-            groupId = "consultation-service-group",
-            containerFactory = "analysesKafkaListenerContainerFactory"
+            groupId = "consultation-service-group"
     )
     public void consume(byte[] message) {
         try {

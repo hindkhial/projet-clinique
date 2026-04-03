@@ -16,8 +16,7 @@ public class AiRadioKafkaConsumer {
 
     @KafkaListener(
             topics = "ai.prediction.done",
-            groupId = "consultation-service-group",
-            containerFactory = "aiPredictionKafkaListenerContainerFactory"
+            groupId = "consultation-service-group"
     )
     public void consume(byte[] message) {
         try {
