@@ -35,7 +35,11 @@ public class ConsultationMapper {
                 .idMedecin(Long.parseLong(event.getRadiologueId()))
                 .idRadio(event.getRadioId())
                 .type(ConsultationType.RADIO)
+                .typeMaladie(event.getTypeMaladie())
+                .confidence(event.getConfidence())
+                .riskLevel(event.getRiskLevel())
                 .dateConsultation(LocalDateTime.now())
+
                 .build();
     }
 
@@ -58,6 +62,10 @@ public class ConsultationMapper {
                 .idPatient(consultation.getIdPatient())
                 .idMedecin(consultation.getIdMedecin())
                 .idRdv(consultation.getIdRdv())
+                .type(consultation.getType())
+                .typeMaladie(consultation.getTypeMaladie())
+                .confidence(consultation.getConfidence())
+                .riskLevel(consultation.getRiskLevel())
                 .observation(consultation.getObservation())
                 .traitement(consultation.getTraitement())
                 .dateConsultation(consultation.getDateConsultation())

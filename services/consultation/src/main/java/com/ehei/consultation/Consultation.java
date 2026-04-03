@@ -31,6 +31,10 @@ public class Consultation {
     @Column(nullable = false)
     private ConsultationType type;
 
+    private String typeMaladie;
+    private Double confidence;
+    private String riskLevel;
+
 
     @Column(columnDefinition = "TEXT")
     private String observation;
