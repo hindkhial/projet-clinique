@@ -26,7 +26,7 @@ include:
 #  - compose/services/staff.yml
 #  - compose/services/rdv.yml
 #  - compose/services/consultation.yml
-#  - compose/services/rapport.yml
+  - compose/services/rapport.yml
 #  - compose/services/analyses.yml
 #  - compose/services/radio.yml
 #  - compose/services/notification.yml

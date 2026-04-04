@@ -1,6 +1,5 @@
 package com.ehei.rapport.dto;
 
-import com.ehei.rapport.model.TypeRapport;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,7 +21,7 @@ public class RapportResponse {
     private String medecinNom;
     private String medecinPrenom;
     private String medecinSpecialite;
-    private TypeRapport typeRapport;
+    private String typeRapport;
     private LocalDateTime dateRapport;
     private String observations;
     private String traitement;
@@ -32,4 +31,3 @@ public class RapportResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
-

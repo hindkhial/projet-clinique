@@ -1,7 +1,6 @@
 package com.ehei.rapport.dto;
 
-
-import com.ehei.rapport.model.TypeRapport;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,8 +20,8 @@ public class CreateRapportRequest {
     @NotNull(message = "Medecin ID est obligatoire")
     private Long medecinId;
 
-    @NotNull(message = "Type de rapport est obligatoire")
-    private TypeRapport typeRapport;
+    @NotBlank(message = "Type de rapport est obligatoire")
+    private String typeRapport;
 
     @NotNull(message = "Date du rapport est obligatoire")
     private LocalDateTime dateRapport;
