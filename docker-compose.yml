@@ -18,7 +18,7 @@ include:
   - compose/databases/radio-db.yml
 
   #AI
-  - compose/AI/AI-radio.yml
+#  - compose/AI/AI-radio.yml
 
 #  # Services
   - compose/services/auth.yml

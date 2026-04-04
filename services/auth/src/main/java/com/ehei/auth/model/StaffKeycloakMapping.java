@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "staff_keycloak_mapping")
 @Data
-public class StaffKeycloakMapping {
+public class StaffKeycloakMapping implements KeycloakMappable{
 
     @Id
     @GeneratedValue()

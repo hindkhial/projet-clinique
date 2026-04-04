@@ -10,11 +10,20 @@ import com.ehei.auth.DTOS.login.RefreshRequest;
 import com.ehei.auth.DTOS.medecin.MedecinRegistrationRequest;
 import com.ehei.auth.DTOS.medecin.MedecinResponseDto;
 import com.ehei.auth.DTOS.medecin.MedecinUpdateRequestAuth;
+import com.ehei.auth.DTOS.patient.PatientAccountResult;
+import com.ehei.auth.DTOS.patient.PatientRegistrationRequest;
+import com.ehei.auth.DTOS.patient.PatientResponse;
+import com.ehei.auth.DTOS.patient.PatientUpdateRequestAuth;
 import com.ehei.auth.feign.MedecinFeignClient;
+import com.ehei.auth.feign.PatientFeignClient;
 import com.ehei.auth.feign.StaffFeignClient;
 import com.ehei.auth.mapper.MedecinMapper;
+import com.ehei.auth.mapper.PatientMapper;
 import com.ehei.auth.mapper.StaffMapper;
+import com.ehei.auth.model.KeycloakMappable;
+import com.ehei.auth.model.PatientKeycloakMapping;
 import com.ehei.auth.model.StaffKeycloakMapping;
+import com.ehei.auth.repository.PatientKeycloakMappingRepository;
 import com.ehei.auth.repository.StaffKeycloakMappingRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +46,10 @@ public class AuthService {
     private final MedecinMapper medecinMapper;
 
     private final StaffKeycloakMappingRepository mappingRepository;
+
+    private final PatientFeignClient patientClient;
+    private final PatientMapper patientMapper;
+    private final PatientKeycloakMappingRepository patientMappingRepository;
 
     // ==================== STAFF OPERATIONS ====================
 
@@ -226,6 +239,118 @@ public class AuthService {
         log.info("Médecin {} supprimé (cascade: Staff {} supprimé aussi)", medecinId, staffId);
     }
 
+    // ==================== PATIENT OPERATIONS ====================
+
+    /**
+     * Crée un compte Patient + compte Keycloak
+     */
+    @Transactional
+    public PatientAccountResult createPatientWithKeycloakAccount(PatientRegistrationRequest request) {
+        // 1. Créer le patient
+        PatientResponse patient = patientClient.create(
+                patientMapper.toPatientCreateRequestDto(request)
+        ).getData();
+
+        log.info("Patient créé avec succès - ID: {}, Email: {}", patient.getId(), patient.getEmail());
+
+        // 2. Créer le compte Keycloak avec rollback en cas d'erreur
+        try {
+            String keycloakId = keycloakService.createUser(
+                    patient.getEmail(),
+                    patient.getPrenom(),
+                    patient.getNom(),
+                    request.getPassword(),
+                    "PATIENT"
+            );
+
+            log.info("Compte Keycloak créé - ID: {}, Email: {}, Rôle: PATIENT", keycloakId, patient.getEmail());
+
+            // 3. Sauvegarder le mapping
+            PatientKeycloakMapping mapping = new PatientKeycloakMapping();
+            mapping.setPatientId(patient.getId());
+            mapping.setKeycloakUserId(keycloakId);
+            mapping.setEmail(patient.getEmail());
+            mapping.setCreatedAt(LocalDateTime.now());
+            patientMappingRepository.save(mapping);
+
+            log.info("Mapping créé: Patient {} ↔ Keycloak {}", patient.getId(), keycloakId);
+
+            return PatientAccountResult.success(patient, keycloakId);
+
+        } catch (Exception e) {
+            rollbackPatientCreation(patient.getId());
+            throw new RuntimeException("Erreur création compte Keycloak: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Met à jour un Patient + compte Keycloak
+     */
+    @Transactional
+    public PatientAccountResult updatePatientWithKeycloakAccount(Long patientId, PatientUpdateRequestAuth request) {
+        // 1. Récupérer le mapping
+        PatientKeycloakMapping mapping = patientMappingRepository.findByPatientId(patientId)
+                .orElseThrow(() -> new RuntimeException("Aucun compte Keycloak trouvé pour ce patient"));
+
+        log.info("Mise à jour du patient {} et compte Keycloak {}", patientId, mapping.getKeycloakUserId());
+
+        // 2. Mettre à jour le patient
+        PatientResponse patient = patientClient.updatePatient(
+                String.valueOf(patientId),
+                patientMapper.toPatientUpdateRequestDto(request)
+        ).getData();
+
+        log.info("Patient mis à jour - ID: {}, Email: {}", patient.getId(), patient.getEmail());
+
+        // 3. Synchroniser avec Keycloak
+        updateKeycloakUser(
+                mapping,
+                patient.getEmail(),
+                patient.getPrenom(),
+                patient.getNom(),
+                "PATIENT",
+                request.getPassword(),
+                patientId
+        );
+
+        return PatientAccountResult.success(patient, mapping.getKeycloakUserId());
+    }
+
+    /**
+     * Supprime un Patient + compte Keycloak
+     */
+    @Transactional
+    public void deletePatientWithKeycloakAccount(Long patientId) {
+        // 1. Récupérer le mapping
+        PatientKeycloakMapping mapping = patientMappingRepository.findByPatientId(patientId)
+                .orElseThrow(() -> new RuntimeException("Aucun compte Keycloak trouvé pour ce patient"));
+
+        log.info("Suppression du patient {} et compte Keycloak {}", patientId, mapping.getKeycloakUserId());
+
+        // 2. Supprimer Keycloak
+        deleteKeycloakUserSafely(mapping.getKeycloakUserId());
+
+        // 3. Supprimer le mapping
+        patientMappingRepository.deleteByPatientId(patientId);
+        log.info("Mapping supprimé pour patient {}", patientId);
+
+        // 4. Supprimer le patient
+        patientClient.deletePatient(String.valueOf(patientId));
+        log.info("Patient {} supprimé", patientId);
+    }
+
+// ==================== ROLLBACK PATIENT ====================
+
+    private void rollbackPatientCreation(Long patientId) {
+        log.error("Erreur Keycloak, rollback du patient {}", patientId);
+        try {
+            patientClient.deletePatient(String.valueOf(patientId));
+            log.info("Patient {} supprimé avec succès (rollback)", patientId);
+        } catch (Exception rollbackEx) {
+            log.error("ERREUR CRITIQUE: Impossible de supprimer le patient {} lors du rollback", patientId);
+        }
+    }
+
     // ==================== MÉTHODES PRIVÉES COMMUNES ====================
 
     /**
@@ -265,10 +390,10 @@ public class AuthService {
 
     /**
      * Met à jour un utilisateur Keycloak et son mapping
-     * Méthode commune pour Staff et Medecin
+     * Méthode commune pour Staff et Medecin et Patient grace a l'interface
      */
     private void updateKeycloakUser(
-            StaffKeycloakMapping mapping,
+            KeycloakMappable mapping,
             String email,
             String prenom,
             String nom,
@@ -299,7 +424,15 @@ public class AuthService {
             if (!mapping.getEmail().equals(email)) {
                 mapping.setEmail(email);
                 mapping.setUpdatedAt(LocalDateTime.now());
-                mappingRepository.save(mapping);
+
+                //TODO: ajouter save() dans le modele
+                // Sauvegarder selon le type
+                if (mapping instanceof StaffKeycloakMapping) {
+                    mappingRepository.save((StaffKeycloakMapping) mapping);
+                } else if (mapping instanceof PatientKeycloakMapping) {
+                    patientMappingRepository.save((PatientKeycloakMapping) mapping);
+                }
+
                 log.info("Mapping mis à jour pour entité {}", entityId);
             }
 
@@ -364,6 +497,8 @@ public class AuthService {
             log.error("ERREUR CRITIQUE: Impossible de supprimer le médecin {} lors du rollback", medecinId);
         }
     }
+
+    // ==================== LOGIN METHODS ====================
 
     public LoginResponse login(LoginRequest request) {
         return keycloakService.login(request.getUsername(), request.getPassword());
