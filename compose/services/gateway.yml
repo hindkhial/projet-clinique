@@ -1,0 +1,12 @@
+services:
+  api-gateway:
+    build: ../../services/ApiGateway
+    container_name: api-gateway
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      AUTH_SERVICE_URL: http://host.docker.internal:9095
+      PATIENT_SERVICE_URL: http://host.docker.internal:9090
+    ports:
+      - "9222:9222"
+    networks:
+      - microservices-network

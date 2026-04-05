@@ -4,23 +4,24 @@ include:
 
   # Infrastructure
   - compose/infra/kafka.yml
-  - compose/infra/minio.yml
-  - compose/infra/mail.yml
+#  - compose/infra/minio.yml
+#  - compose/infra/mail.yml
 
   # Databases
   - compose/databases/auth-db.yml
   - compose/databases/patient-db.yml
   - compose/databases/staff-db.yml
-  - compose/databases/rdv-db.yml
-  - compose/databases/consultation-db.yml
-  - compose/databases/rapport-db.yml
-  - compose/databases/analyses-db.yml
-  - compose/databases/radio-db.yml
+#  - compose/databases/rdv-db.yml
+#  - compose/databases/consultation-db.yml
+#  - compose/databases/rapport-db.yml
+#  - compose/databases/analyses-db.yml
+#  - compose/databases/radio-db.yml
 
   #AI
 #  - compose/AI/AI-radio.yml
 
 #  # Services
+  - compose/services/gateway.yml
   - compose/services/auth.yml
 #  - compose/services/patient.yml
 #  - compose/services/staff.yml
