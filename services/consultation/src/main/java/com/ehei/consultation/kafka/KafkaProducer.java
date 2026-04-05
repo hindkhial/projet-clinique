@@ -17,15 +17,20 @@ public class KafkaProducer {
     }
 
     public void sendEvent(Consultation consultation) {
-        ConsultationCreatedEvent event = ConsultationCreatedEvent.newBuilder()
+        ConsultationCreatedEvent.Builder builder = ConsultationCreatedEvent.newBuilder()
                 .setId(consultation.getId())
                 .setIdPatient(consultation.getIdPatient())
-                .setIdMedecin(consultation.getIdMedecin())
-                .setIdRdv(consultation.getIdRdv())
                 .setDateConsultation(consultation.getDateConsultation().toString())
                 .setObservation(consultation.getObservation() == null ? "" : consultation.getObservation())
                 .setTraitement(consultation.getTraitement() == null ? "" : consultation.getTraitement())
-                .build();
+                .setType(consultation.getType().name());
+
+        if (consultation.getIdMedecin() != null)  builder.setIdMedecin(consultation.getIdMedecin());
+        if (consultation.getIdRdv()     != null)  builder.setIdRdv(consultation.getIdRdv());
+        if (consultation.getIdRadio()   != null)  builder.setIdRadio(consultation.getIdRadio());
+        if (consultation.getIdAnalyse() != null)  builder.setIdAnalyse(consultation.getIdAnalyse());
+
+        ConsultationCreatedEvent event = builder.build();
 
         try {
             kafkaTemplate.send("Consultation_Created", event.toByteArray());

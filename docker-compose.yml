@@ -23,14 +23,14 @@ include:
 #  # Services
   - compose/services/gateway.yml
   - compose/services/auth.yml
-#  - compose/services/patient.yml
-#  - compose/services/staff.yml
-#  - compose/services/rdv.yml
-#  - compose/services/consultation.yml
-#  - compose/services/rapport.yml
-#  - compose/services/analyses.yml
-#  - compose/services/radio.yml
-#  - compose/services/notification.yml
+  - compose/services/patient.yml
+  - compose/services/staff.yml
+  - compose/services/rdv.yml
+  - compose/services/consultation.yml
+  - compose/services/rapport.yml
+  - compose/services/analyses.yml
+  - compose/services/radio.yml
+  - compose/services/notification.yml
 
   # UI
 #  - compose/ui/angular.yml

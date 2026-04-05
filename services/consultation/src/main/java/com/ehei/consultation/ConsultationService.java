@@ -1,9 +1,12 @@
 package com.ehei.consultation;
 
+import com.ehei.ai.proto.AIPredictionEvent;
+import com.ehei.analyses.proto.AnalysesSubmittedEvent;
 import com.ehei.consultation.dtos.ConsultationCreateRequest;
 import com.ehei.consultation.dtos.ConsultationResponse;
 import com.ehei.consultation.dtos.ConsultationUpdateRequest;
 import com.ehei.consultation.kafka.KafkaProducer;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.Data;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +21,8 @@ public class ConsultationService {
     private final ConsultationMapper consultationMapper;
     private final KafkaProducer kafkaProducer;
 
+    //  NORMAL consultation
+
     public ConsultationResponse create(ConsultationCreateRequest requestDto) {
         Consultation consultation = consultationMapper.toModel(requestDto);
         consultation.setDateConsultation(LocalDateTime.now());
@@ -26,6 +31,26 @@ public class ConsultationService {
 
         kafkaProducer.sendEvent(savedConsultation);
         return consultationMapper.toResponseDto(savedConsultation);
+    }
+
+    // RADIO consultation
+
+    public void createFromAiPrediction(AIPredictionEvent event) {
+        Consultation consultation = consultationMapper.toModel(event);
+
+        Consultation savedConsultation = consultationRepository.save(consultation);
+
+        kafkaProducer.sendEvent(savedConsultation);
+    }
+
+    // ANALYSES consultation
+
+    public void createFromAnalyses(AnalysesSubmittedEvent event) {
+        Consultation consultation = consultationMapper.toModel(event);
+
+        Consultation savedConsultation = consultationRepository.save(consultation);
+
+        kafkaProducer.sendEvent(savedConsultation);
     }
 
     public List<ConsultationResponse> getAll() {
