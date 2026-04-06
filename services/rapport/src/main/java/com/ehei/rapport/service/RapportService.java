@@ -1,6 +1,5 @@
 package com.ehei.rapport.service;
 
-
 import com.ehei.rapport.dto.CreateRapportRequest;
 import com.ehei.rapport.dto.RapportResponse;
 import com.ehei.rapport.exception.InvalidRapportException;
@@ -9,6 +8,7 @@ import com.ehei.rapport.kafka.KafkaProducer;
 import com.ehei.rapport.mapper.RapportMapper;
 import com.ehei.rapport.model.Rapport;
 import com.ehei.rapport.repository.RapportRepository;
+import consultation.events.ConsultationCreatedEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,16 +29,15 @@ public class RapportService {
     private final MinioService minioService;
     private final KafkaProducer kafkaProducer;
 
-    //creation du rapport avec generation du PDF automatic
+    // ── Manual creation (REST) ─────────────────────────────────────────────
+
     @Transactional
     public RapportResponse createRapport(CreateRapportRequest request) {
         log.info("creation d'un nouveau rapport pour patient: {}", request.getPatientId());
 
-        //validation
         validateRequest(request);
 
         Rapport rapport = rapportMapper.toEntity(request);
-
         Rapport savedRapport = rapportRepository.save(rapport);
 
         log.info("Rapport cree avec succes - ID: {}", savedRapport.getId());
@@ -49,7 +48,6 @@ public class RapportService {
             savedRapport.setPdfFileUrl(pdfUrl);
             savedRapport = rapportRepository.save(savedRapport);
 
-            // Envoie l'événement Kafka
             kafkaProducer.sendRapportGeneratedEvent(savedRapport);
 
             log.info("PDF generer et uploader: {}", pdfUrl);
@@ -60,6 +58,34 @@ public class RapportService {
         return rapportMapper.toResponse(savedRapport);
     }
 
+    // ── Auto creation from ConsultationCreatedEvent (Kafka) ───────────────
+
+    @Transactional
+    public void createFromConsultationEvent(ConsultationCreatedEvent event) {
+        log.info("Creation rapport depuis consultation id: {} type: {}",
+                event.getId(), event.getType());
+
+        Rapport rapport = rapportMapper.fromConsultationEvent(event);
+        Rapport savedRapport = rapportRepository.save(rapport);
+
+        log.info("Rapport cree avec succes - ID: {}", savedRapport.getId());
+        try {
+            InputStream pdfStream = pdfGeneratorService.generatePdf(savedRapport);
+            String pdfUrl = minioService.uploadPdf(pdfStream, savedRapport.getId());
+
+            savedRapport.setPdfFileUrl(pdfUrl);
+            savedRapport = rapportRepository.save(savedRapport);
+
+            kafkaProducer.sendRapportGeneratedEvent(savedRapport);
+
+            log.info("PDF generer et uploader: {}", pdfUrl);
+        } catch (Exception e) {
+            log.error("PDF generation failed: {}", e.getMessage());
+        }
+    }
+
+    // ── Queries ────────────────────────────────────────────────────────────
+
     @Transactional(readOnly = true)
     public List<RapportResponse> getRapportsByPatient(Long patientId) {
         log.info("recuperation des rapports du patient: {}", patientId);
@@ -68,13 +94,11 @@ public class RapportService {
             throw new InvalidRapportException("Patient ID est invalide");
         }
 
-        List<Rapport> rapports = rapportRepository.findByPatientId(patientId);
-
-        return rapports.stream()
+        return rapportRepository.findByPatientId(patientId)
+                .stream()
                 .map(rapportMapper::toResponse)
                 .collect(Collectors.toList());
     }
-
 
     @Transactional(readOnly = true)
     public List<RapportResponse> getRapportsByMedecin(Long medecinId) {
@@ -84,9 +108,8 @@ public class RapportService {
             throw new InvalidRapportException("Medecin ID est invalide");
         }
 
-        List<Rapport> rapports = rapportRepository.findByMedecinId(medecinId);
-
-        return rapports.stream()
+        return rapportRepository.findByMedecinId(medecinId)
+                .stream()
                 .map(rapportMapper::toResponse)
                 .collect(Collectors.toList());
     }
@@ -99,28 +122,26 @@ public class RapportService {
             throw new InvalidRapportException("Rapport ID est invalide");
         }
 
-        Rapport rapport = rapportRepository.findById(id)
-                .orElseThrow(() -> new RapportNotFoundException(id));
-
-        return rapportMapper.toResponse(rapport);
+        return rapportMapper.toResponse(
+                rapportRepository.findById(id)
+                        .orElseThrow(() -> new RapportNotFoundException(id))
+        );
     }
 
     @Transactional(readOnly = true)
     public List<RapportResponse> getAllRapports() {
         log.info("recuperation de tous les rapports");
-
-        List<Rapport> rapports = rapportRepository.findAll();
-
-        return rapports.stream()
+        return rapportRepository.findAll()
+                .stream()
                 .map(rapportMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public void deleteRapport(Long id){
+    public void deleteRapport(Long id) {
         log.info("suppression de rapport: {}", id);
 
-        if (id == null || id <= 0){
+        if (id == null || id <= 0) {
             throw new InvalidRapportException("id rapport invalide");
         }
 
@@ -136,10 +157,8 @@ public class RapportService {
             }
         }
 
-        // Delete rapport from database
         rapportRepository.deleteById(id);
-
-        log.info("✅ Rapport deleted: {}", id);
+        log.info("Rapport supprime: {}", id);
     }
 
     @Transactional
@@ -149,18 +168,13 @@ public class RapportService {
         Rapport rapport = rapportRepository.findById(id)
                 .orElseThrow(() -> new RapportNotFoundException(id));
 
-        // Generate PDF
         InputStream pdfStream = pdfGeneratorService.generatePdf(rapport);
-
-        // Upload to MinIO
         String pdfUrl = minioService.uploadPdf(pdfStream, rapport.getId());
 
-        // Update rapport
         rapport.setPdfFileUrl(pdfUrl);
         Rapport updated = rapportRepository.save(rapport);
 
         log.info("PDF generated: {}", pdfUrl);
-
         return rapportMapper.toResponse(updated);
     }
 

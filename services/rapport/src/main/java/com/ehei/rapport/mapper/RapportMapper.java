@@ -3,12 +3,16 @@ package com.ehei.rapport.mapper;
 import com.ehei.rapport.dto.CreateRapportRequest;
 import com.ehei.rapport.dto.RapportResponse;
 import com.ehei.rapport.model.Rapport;
+import consultation.events.ConsultationCreatedEvent;
 import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
 
 @Component
 public class RapportMapper {
 
-    //convertir CreateRapportRequest (DTO) to Rapport (Entity)
+    // ── Manual creation (REST) ─────────────────────────────────────────────
+
     public Rapport toEntity(CreateRapportRequest request) {
         return Rapport.builder()
                 .patientId(request.getPatientId())
@@ -22,7 +26,22 @@ public class RapportMapper {
                 .build();
     }
 
-    //convertir Rapport (Entity) to RapportResponse (DTO)
+    // ── From ConsultationCreatedEvent (Kafka) ──────────────────────────────
+
+    public Rapport fromConsultationEvent(ConsultationCreatedEvent event) {
+        return Rapport.builder()
+                .consultationId(event.getId())
+                .patientId(event.getIdPatient())
+                .medecinId(event.hasIdMedecin() ? event.getIdMedecin() : null)
+                .typeRapport(event.getType())   // NORMAL, RADIO, ANALYSES
+                .dateRapport(LocalDateTime.now())
+                .observations(event.getObservation().isEmpty() ? null : event.getObservation())
+                .traitement(event.getTraitement().isEmpty() ? null : event.getTraitement())
+                .build();
+    }
+
+    // ── Response mapping ───────────────────────────────────────────────────
+
     public RapportResponse toResponse(Rapport rapport) {
         return RapportResponse.builder()
                 .id(rapport.getId())
@@ -46,6 +65,4 @@ public class RapportMapper {
                 .updatedAt(rapport.getUpdatedAt())
                 .build();
     }
-
-
 }
