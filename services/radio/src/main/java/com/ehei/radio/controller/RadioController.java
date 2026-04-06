@@ -21,6 +21,8 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import jakarta.validation.Valid;
+import com.ehei.radio.dto.RadioValidationRequest;
 
 import java.io.InputStream;
 import java.util.List;
@@ -128,6 +130,32 @@ public class RadioController {
         return ResponseEntity.ok(radios);
     }
 
+    @GetMapping("/Radiologue/{id}/predicted")
+    @Operation(
+            summary = "Get PREDICTED radios by radiologist",
+            description = "Retrieves all radiology images assigned to a specific radiologist that are waiting for validation (status = PREDICTED)"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully retrieved radiologist's pending radios",
+                    content = @Content(schema = @Schema(implementation = List.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Radiologist not found",
+                    content = @Content
+            )
+    })
+    public ResponseEntity<List<RadioResponse>> getPredictedRadiosByRadiologue(
+            @Parameter(description = "ID of the radiologist", required = true)
+            @PathVariable Long id) {
+        log.info("GET /Radio/Radiologue/{}/predicted - Recuperation des radios en attente de validation", id);
+
+        List<RadioResponse> radios = radioService.getPredictedRadiosByRadiologue(id);
+        return ResponseEntity.ok(radios);
+    }
+
     @GetMapping("/{id}")
     @Operation(
             summary = "Get radio by ID",
@@ -207,6 +235,35 @@ public class RadioController {
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=radio_" + id + ".jpg")
                 .contentType(MediaType.IMAGE_JPEG)
                 .body(new InputStreamResource(imageStream));
+    }
+
+    @PostMapping("/validate/{id}")
+    @Operation(
+            summary = "Validate API Prediction",
+            description = "Allows radiologist to validate or correct AI predictions for a radio"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Radio successfully validated",
+                    content = @Content(schema = @Schema(implementation = RadioResponse.class))
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Radio not found",
+                    content = @Content
+            )
+    })
+    public ResponseEntity<RadioResponse> validateRadio(
+            @Parameter(description = "ID of the radio to validate", required = true)
+            @PathVariable Long id,
+            @Parameter(description = "Validation details", required = true)
+            @RequestBody @Valid RadioValidationRequest validationRequest) {
+        
+        log.info("POST /Radio/validate/{} - Validation du radio", id);
+
+        RadioResponse response = radioService.validateRadio(id, validationRequest);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")

@@ -89,6 +89,19 @@ public class RadioService {
     }
 
     @Transactional(readOnly = true)
+    public List<RadioResponse> getPredictedRadiosByRadiologue(Long radiologueId) {
+        log.info("Recuperation des radios PREDICTED du radiologue: {}", radiologueId);
+
+        if (radiologueId == null || radiologueId <= 0) {
+            throw new InvalidRadioException("Radiologue ID est invalide");
+        }
+
+        return radioRepository.findByRadiologueIdAndStatus(radiologueId, com.ehei.radio.model.RadioStatus.PREDICTED).stream()
+                .map(radioMapper::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public RadioResponse getRadioById(Long id) {
         log.info("Recuperation du radio: {}", id);
 
@@ -133,6 +146,52 @@ public class RadioService {
 
         radioRepository.deleteById(id);
         log.info("Radio supprime: {}", id);
+    }
+
+    @Transactional
+    public void updateFromAiPrediction(com.ehei.ai.proto.AIPredictionEvent event) {
+        log.info("Mise a jour du radio {} à partir de la prediction AI", event.getRadioId());
+        
+        Long radioId = Long.parseLong(event.getRadioId());
+        Radio radio = radioRepository.findById(radioId)
+            .orElseThrow(() -> new RadioNotFoundException(radioId));
+            
+        radio.setStatus(com.ehei.radio.model.RadioStatus.PREDICTED);
+        radio.setTypeMaladie(event.getTypeMaladie());
+        radio.setConfidence(event.getConfidence());
+        radio.setRiskLevel(event.getRiskLevel());
+        radio.setHeatmapUrl(event.getHeatmapUrl());
+        
+        radioRepository.save(radio);
+        log.info("Prediction AI enregistrée pour le radio {}", radioId);
+    }
+
+    @Transactional
+    public RadioResponse validateRadio(Long id, com.ehei.radio.dto.RadioValidationRequest request) {
+        log.info("Validation du radio: {}", id);
+
+        Radio radio = radioRepository.findById(id)
+                .orElseThrow(() -> new RadioNotFoundException(id));
+
+        radio.setStatus(com.ehei.radio.model.RadioStatus.VALIDATED);
+        
+        if ("MODIFIE".equalsIgnoreCase(request.getDecision())) {
+            if (request.getTypeMaladie() != null) radio.setTypeMaladie(request.getTypeMaladie());
+            if (request.getConfidence() != null) radio.setConfidence(request.getConfidence());
+            if (request.getRiskLevel() != null) radio.setRiskLevel(request.getRiskLevel());
+        }
+
+        if (request.getCommentaire() != null) {
+            radio.setNotesRadiologue(request.getCommentaire());
+        }
+
+        Radio savedRadio = radioRepository.save(radio);
+        
+        // Notify consultation service that radio is validated
+        kafkaProducer.sendRadioValidatedEvent(savedRadio);
+
+        log.info("Radio {} validé avec succès", id);
+        return radioMapper.toResponse(savedRadio);
     }
 
     private void validateRequest(CreateRadioRequest request) {

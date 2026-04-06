@@ -4,26 +4,25 @@ include:
 
   # Infrastructure
   - compose/infra/kafka.yml
-#  - compose/infra/minio.yml
-#  - compose/infra/mail.yml
+  - compose/infra/minio.yml
+  - compose/infra/mail.yml
 
   # Databases
   - compose/databases/auth-db.yml
   - compose/databases/patient-db.yml
   - compose/databases/staff-db.yml
-#  - compose/databases/rdv-db.yml
-#  - compose/databases/consultation-db.yml
-#  - compose/databases/rapport-db.yml
-#  - compose/databases/analyses-db.yml
-#  - compose/databases/radio-db.yml
+  - compose/databases/rdv-db.yml
+  - compose/databases/consultation-db.yml
+  - compose/databases/rapport-db.yml
+  - compose/databases/analyses-db.yml
+  - compose/databases/radio-db.yml
 
   #AI
-#  - compose/AI/AI-radio.yml
+  - compose/AI/AI-radio.yml
 
 #  # Services
   - compose/services/gateway.yml
   - compose/services/auth.yml
-<<<<<<< HEAD
   - compose/services/patient.yml
   - compose/services/staff.yml
   - compose/services/rdv.yml
@@ -32,16 +31,7 @@ include:
   - compose/services/analyses.yml
   - compose/services/radio.yml
   - compose/services/notification.yml
-=======
-#  - compose/services/patient.yml
-#  - compose/services/staff.yml
-#  - compose/services/rdv.yml
-#  - compose/services/consultation.yml
-  - compose/services/rapport.yml
-#  - compose/services/analyses.yml
-#  - compose/services/radio.yml
-#  - compose/services/notification.yml
->>>>>>> 8ebeaa0d39b35806b197df9b44d003ae34343e23
+
 
   # UI
 #  - compose/ui/angular.yml

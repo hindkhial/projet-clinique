@@ -21,5 +21,13 @@ public class RadioResponse {
     private String notes;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    // AI and Verification Fields
+    private String status;
+    private String typeMaladie;
+    private Double confidence;
+    private String riskLevel;
+    private String heatmapUrl;
+    private String notesRadiologue;
 }
 

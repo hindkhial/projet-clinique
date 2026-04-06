@@ -1,6 +1,5 @@
 package com.ehei.consultation;
 
-import com.ehei.ai.proto.AIPredictionEvent;
 import com.ehei.analyses.proto.AnalysesSubmittedEvent;
 import com.ehei.consultation.dtos.ConsultationCreateRequest;
 import com.ehei.consultation.dtos.ConsultationResponse;
@@ -29,7 +28,7 @@ public class ConsultationMapper {
 
     // RADIO mapping
 
-    public Consultation toModel(AIPredictionEvent event) {
+    public Consultation toModel(radio.events.RadioValidatedEvent event) {
         return Consultation.builder()
                 .idPatient(Long.parseLong(event.getPatientId()))
                 .idMedecin(Long.parseLong(event.getRadiologueId()))
@@ -39,7 +38,7 @@ public class ConsultationMapper {
                 .confidence(event.getConfidence())
                 .riskLevel(event.getRiskLevel())
                 .dateConsultation(LocalDateTime.now())
-
+                .observation(event.getNotesRadiologue() != null && !event.getNotesRadiologue().isEmpty() ? "Notes du radiologue: " + event.getNotesRadiologue() : null)
                 .build();
     }
 

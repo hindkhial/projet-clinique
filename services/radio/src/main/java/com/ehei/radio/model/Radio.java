@@ -35,9 +35,23 @@ public class Radio {
     private String patientNom;
     private String patientPrenom;
 
+    @Builder.Default
+    @Column(nullable = false, columnDefinition = "varchar(255) default 'PENDING'")
+    @Enumerated(EnumType.STRING)
+    private RadioStatus status = RadioStatus.PENDING;
+
+    // Champs de prediction AI
+    private String typeMaladie;
+    private Double confidence;
+    private String riskLevel;
+    private String heatmapUrl;
+
     // Notes optionnelles
     @Column(columnDefinition = "TEXT")
     private String notes;
+
+    @Column(columnDefinition = "TEXT")
+    private String notesRadiologue;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

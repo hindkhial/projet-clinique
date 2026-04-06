@@ -14,4 +14,7 @@ public interface RadioRepository extends JpaRepository<Radio, Long> {
 
     // Trouver tous les radios d'un radiologue
     List<Radio> findByRadiologueId(Long radiologueId);
+
+    // Trouver tous les radios d'un radiologue avec un statut spécifique
+    List<Radio> findByRadiologueIdAndStatus(Long radiologueId, com.ehei.radio.model.RadioStatus status);
 }

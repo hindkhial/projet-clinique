@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package radio.events;
+
+option java_multiple_files = true;
+
+message RadioValidatedEvent {
+  string radio_id = 1;
+  string patient_id = 2;
+  string radiologue_id = 3;
+  string fichier_radio_url = 4;
+  string type_maladie = 5;
+  double confidence = 6;
+  string risk_level = 7;
+  string heatmap_url = 8;
+  string date_validation = 9;
+  string notes_radiologue = 10;
+}

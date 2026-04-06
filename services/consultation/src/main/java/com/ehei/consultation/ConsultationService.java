@@ -1,6 +1,5 @@
 package com.ehei.consultation;
 
-import com.ehei.ai.proto.AIPredictionEvent;
 import com.ehei.analyses.proto.AnalysesSubmittedEvent;
 import com.ehei.consultation.dtos.ConsultationCreateRequest;
 import com.ehei.consultation.dtos.ConsultationResponse;
@@ -35,7 +34,7 @@ public class ConsultationService {
 
     // RADIO consultation
 
-    public void createFromAiPrediction(AIPredictionEvent event) {
+    public void createFromValidatedRadio(radio.events.RadioValidatedEvent event) {
         Consultation consultation = consultationMapper.toModel(event);
 
         Consultation savedConsultation = consultationRepository.save(consultation);
