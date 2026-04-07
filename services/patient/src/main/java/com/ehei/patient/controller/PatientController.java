@@ -150,4 +150,12 @@ public class PatientController {
         patientService.deleteById(Long.valueOf(id));
         return ResponseEntity.ok().body(com.ehei.patient.dto.ApiResponse.success("patient supprime avec succes."));
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<com.ehei.patient.dto.ApiResponse<List<PatientResponse>>> searchPatients(
+            @RequestParam String q
+    ) {
+        List<PatientResponse> response = patientService.searchPatients(q);
+        return ResponseEntity.ok().body(com.ehei.patient.dto.ApiResponse.success(response));
+    }
 }
