@@ -62,4 +62,11 @@ public class PatientService {
         Patient patient = patientRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Aucun patient n'existe avec id: " + id));
         patientRepository.delete(patient);
     }
+
+    public List<PatientResponse> searchPatients(String q) {
+        return patientRepository.searchByNomOrEmail(q)
+                .stream()
+                .map(patientMapper::toResponseDto)
+                .toList();
+    }
 }
