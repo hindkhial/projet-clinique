@@ -1,0 +1,88 @@
+<div class="container py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">Patients</h4>
+    <a routerLink="/receptionniste/patients/nouveau" class="btn btn-primary">
+      + Nouveau patient
+    </a>
+  </div>
+
+  <div class="mb-3">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Rechercher par nom ou email..."
+      [value]="searchTerm()"
+      (input)="searchTerm.set($any($event.target).value)"
+    />
+  </div>
+
+  @if (patientsResource.isLoading()) {
+    <div class="d-flex align-items-center gap-2 text-secondary">
+      <span class="spinner-border spinner-border-sm"></span>
+      <span>Chargement...</span>
+    </div>
+  }
+
+  @if (patientsResource.error()) {
+    <div class="alert alert-danger">Erreur lors du chargement des patients.</div>
+  }
+
+  @if ((patientsResource.value() ?? []).length > 0) {
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+      <tr>
+        <th>Nom</th>
+        <th>Prénom</th>
+        <th>Email</th>
+        <th>Téléphone</th>
+        <th>Date de naissance</th>
+        <th>Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+        @for (patient of patientsResource.value()!; track patient.id) {
+          <tr>
+            <td>{{ patient.nom }}</td>
+            <td>{{ patient.prenom }}</td>
+            <td>{{ patient.email }}</td>
+            <td>{{ patient.tel }}</td>
+            <td>{{ patient.dateNaissance }}</td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary me-2"
+                      (click)="editingPatient.set(patient)">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger"
+                      (click)="deletingPatient.set(patient)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+  @if (!patientsResource.isLoading() && (patientsResource.value() ?? []).length === 0) {
+    <div class="alert alert-info">Aucun patient trouvé.</div>
+  }
+
+</div>
+
+<!-- Modals montées conditionnellement -->
+@if (editingPatient()) {
+  <app-edit-modal
+    [patient]="editingPatient()!"
+    (saved)="editingPatient.set(null); patientsResource.reload()"
+    (cancelled)="editingPatient.set(null)"
+  />
+}
+
+@if (deletingPatient()) {
+  <app-delete-modal
+    [patient]="deletingPatient()!"
+    (deleted)="deletingPatient.set(null); patientsResource.reload()"
+    (cancelled)="deletingPatient.set(null)"
+  />
+}
