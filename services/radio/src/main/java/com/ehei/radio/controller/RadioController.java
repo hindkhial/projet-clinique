@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.annotation.security.RolesAllowed;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.InputStreamResource;
@@ -38,6 +39,7 @@ public class RadioController {
         private final MinioService minioService;
         private final ObjectMapper objectMapper;
 
+        @RolesAllowed("TECHNICIEN")
         @PostMapping("/Upload")
         @Operation(summary = "Upload a new radiology image", description = "Uploads a radiology image file along with associated metadata to MinIO storage")
         @ApiResponses(value = {
