@@ -1,0 +1,83 @@
+.card {
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+}
+
+.card-body {
+  background: white;
+  border-radius: 10px;
+}
+
+.form-control {
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+}
+
+.form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+}
+
+.form-control.is-invalid {
+  border-color: #dc3545;
+}
+
+.form-control.is-invalid:focus {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+.invalid-feedback {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.btn-primary {
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #0b5ed7;
+  border-color: #0b5ed7;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.btn-outline-secondary {
+  border-radius: 6px;
+  padding: 10px 20px;
+  font-weight: 500;
+}
+
+.form-label {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.5rem;
+}
+
+.form-check-label {
+  color: #666;
+}
+
+.card-title {
+  color: #333;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+}
+
+a {
+  color: #0d6efd;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #0b5ed7;
+  text-decoration: underline;
+}

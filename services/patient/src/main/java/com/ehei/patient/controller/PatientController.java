@@ -4,6 +4,7 @@ import com.ehei.patient.dto.PatientCreateRequeste;
 import com.ehei.patient.dto.PatientResponse;
 import com.ehei.patient.dto.PatientUpdateRequeste;
 import com.ehei.patient.service.PatientService;
+import com.ehei.patient.utils.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -45,8 +46,10 @@ public class PatientController {
             )
     })
     public ResponseEntity<com.ehei.patient.dto.ApiResponse<PatientResponse>> create(
+            @RequestHeader("X-User-Roles") String rolesHeader,
             @RequestBody @Valid PatientCreateRequeste patientDto
     ){
+        SecurityUtils.requireRole(rolesHeader, "STAFF");
         PatientResponse response = patientService.createPatient(patientDto);
         return ResponseEntity.ok().body(com.ehei.patient.dto.ApiResponse.success(response,
                 "patient creee avec succes."));
@@ -64,7 +67,10 @@ public class PatientController {
                     content = @Content(schema = @Schema(implementation = List.class))
             )
     })
-    public ResponseEntity<com.ehei.patient.dto.ApiResponse<List<PatientResponse>>> getAllPatients(){
+    public ResponseEntity<com.ehei.patient.dto.ApiResponse<List<PatientResponse>>> getAllPatients(
+            @RequestHeader("X-User-Roles") String rolesHeader
+    ){
+        SecurityUtils.requireRole(rolesHeader, "STAFF");
         List<PatientResponse> response = patientService.getAll();
         return ResponseEntity.ok().body(com.ehei.patient.dto.ApiResponse.success(response));
     }
@@ -88,8 +94,11 @@ public class PatientController {
     })
     public ResponseEntity<com.ehei.patient.dto.ApiResponse<PatientResponse>> getPatientById(
             @Parameter(description = "ID of the patient to retrieve", required = true)
-            @PathVariable String id
+            @PathVariable String id,
+            @RequestHeader("X-User-Roles") String rolesHeader
+
     ){
+        SecurityUtils.requireRole(rolesHeader, "STAFF");
         PatientResponse response = patientService.getById(Long.valueOf(id));
         return ResponseEntity.ok().body(com.ehei.patient.dto.ApiResponse.success(response));
     }
@@ -117,6 +126,7 @@ public class PatientController {
             )
     })
     public ResponseEntity<com.ehei.patient.dto.ApiResponse<PatientResponse>> updatePatient(
+            @RequestHeader("X-User-Roles") String rolesHeader,
             @Parameter(description = "ID of the patient to update", required = true)
             @PathVariable String id,
             @RequestBody @Valid PatientUpdateRequeste patientDto
@@ -145,9 +155,34 @@ public class PatientController {
     })
     public ResponseEntity<com.ehei.patient.dto.ApiResponse<String>> deletePatient(
             @Parameter(description = "ID of the patient to delete", required = true)
-            @PathVariable String id
+            @PathVariable String id,
+            @RequestHeader("X-User-Roles") String rolesHeader
+
     ){
+        SecurityUtils.requireRole(rolesHeader, "STAFF");
         patientService.deleteById(Long.valueOf(id));
         return ResponseEntity.ok().body(com.ehei.patient.dto.ApiResponse.success("patient supprime avec succes."));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<com.ehei.patient.dto.ApiResponse<List<PatientResponse>>> searchPatients(
+            @RequestParam String q,
+            @RequestHeader("X-User-Roles") String rolesHeader
+    ) {
+        SecurityUtils.requireRole(rolesHeader, "STAFF");
+        List<PatientResponse> response = patientService.searchPatients(q);
+        return ResponseEntity.ok().body(com.ehei.patient.dto.ApiResponse.success(response));
+    }
+
+    // ==================== PATIENT : son propre profil ====================
+
+    @GetMapping("/me")
+    public ResponseEntity<com.ehei.patient.dto.ApiResponse<PatientResponse>> getMe(
+            @RequestHeader("X-Internal-Id") Long id,
+            @RequestHeader("X-User-Roles") String rolesHeader
+    ) {
+        SecurityUtils.requireRole(rolesHeader, "PATIENT");
+        PatientResponse response = patientService.getById(id);
+        return ResponseEntity.ok(com.ehei.patient.dto.ApiResponse.success(response));
     }
 }

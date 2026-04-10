@@ -260,7 +260,8 @@ public class AuthService {
                     patient.getPrenom(),
                     patient.getNom(),
                     request.getPassword(),
-                    "PATIENT"
+                    "PATIENT",
+                    patient.getId()
             );
 
             log.info("Compte Keycloak créé - ID: {}, Email: {}, Rôle: PATIENT", keycloakId, patient.getEmail());
@@ -370,7 +371,8 @@ public class AuthService {
                 firstName,
                 lastName,
                 password,
-                role
+                role,
+                staffId
         );
 
         log.info("Compte Keycloak créé - ID: {}, Email: {}, Rôle: {}", keycloakId, email, role);
