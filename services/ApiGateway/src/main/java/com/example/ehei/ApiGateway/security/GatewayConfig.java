@@ -41,6 +41,11 @@ public class GatewayConfig {
                             .map(map -> (List<String>) map.get("roles"))
                             .orElse(List.of()); // liste vide si le claim est absent
 
+                    // récupérer internalId depuis le claim ajouté par le Protocol Mapper
+                    String internalId = Optional.ofNullable(jwt.getClaim("internalId"))
+                            .map(Object::toString)
+                            .orElse("");
+
                     // on modifie la requête entrante en ajoutant les infos utilisateur en headers
                     // les services en aval peuvent lire ces headers directement
                     ServerHttpRequest mutatedRequest = exchange.getRequest()

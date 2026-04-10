@@ -57,6 +57,14 @@ export class AuthService {
     return this.getRoles().includes(role);
   }
 
+  getEmail(): string | null {
+    return this._payload()?.['email'] ?? null;
+  }
+
+  getInternalId(): number | null {
+    return this._payload()?.['internalId'] ?? null;
+  }
+
   // ── Login / Logout ────────────────────────────────────────────────────────
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
