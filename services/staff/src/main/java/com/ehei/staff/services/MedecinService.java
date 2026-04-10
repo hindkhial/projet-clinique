@@ -62,4 +62,9 @@ public class MedecinService {
         return medecinMapper.toResponseDto(medecinRepository.save(oldMedecin));
     }
 
+    public MedecinResponseDto getByStaffId(Long staffId) {
+        return medecinRepository.findByStaff_Id(staffId)
+                .map(medecinMapper::toResponseDto)
+                .orElseThrow(() -> new RuntimeException("Médecin non trouvé"));
+    }
 }
