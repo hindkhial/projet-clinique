@@ -4,6 +4,7 @@ include:
 
   # Infrastructure
   - compose/infra/kafka.yml
+  - compose/infra/keycloak.yml
 #  - compose/infra/minio.yml
 #  - compose/infra/mail.yml
 
@@ -22,7 +23,7 @@ include:
 
 #  # Services
   - compose/services/gateway.yml
-  - compose/services/auth.yml
+#  - compose/services/auth.yml
 #  - compose/services/patient.yml
 #  - compose/services/staff.yml
 #  - compose/services/rdv.yml

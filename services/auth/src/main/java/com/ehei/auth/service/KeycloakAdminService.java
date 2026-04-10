@@ -22,7 +22,9 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -56,8 +58,8 @@ public class KeycloakAdminService {
                 .build();
     }
 
-    public String createUser(String email, String firstName, String lastName, String password, String role) {
-        // Créer user
+    public String createUser(String email, String firstName, String lastName, String password, String role, Long internalId) {
+        // 1. Créer l'user SANS attribut
         UserRepresentation user = new UserRepresentation();
         user.setUsername(email);
         user.setEmail(email);
@@ -66,23 +68,29 @@ public class KeycloakAdminService {
         user.setEnabled(true);
 
         Response response = keycloak.realm(realm).users().create(user);
-
         if (response.getStatus() != 201) {
             throw new RuntimeException("Erreur Keycloak: " + response.getStatus());
         }
 
-        // Récupérer l'ID
         String userId = response.getLocation().getPath().replaceAll(".*/([^/]+)$", "$1");
 
-        // Définir le mot de passe
+        // 2. Récupérer l'user créé et lui ajouter l'attribut
+        UserRepresentation createdUser = keycloak.realm(realm).users().get(userId).toRepresentation();
+        Map<String, List<String>> attributes = new HashMap<>();
+        attributes.put("internalId", List.of(internalId.toString()));
+        createdUser.setAttributes(attributes);
+        keycloak.realm(realm).users().get(userId).update(createdUser);
+
+        log.info("Attribut internalId={} ajouté à l'utilisateur {}", internalId, userId);
+
+        // 3. Password
         CredentialRepresentation credential = new CredentialRepresentation();
         credential.setType(CredentialRepresentation.PASSWORD);
         credential.setValue(password);
         credential.setTemporary(false);
-
         keycloak.realm(realm).users().get(userId).resetPassword(credential);
 
-        // Assigner le rôle
+        // 4. Rôle
         assignRoleToUser(userId, role);
 
         log.info("Utilisateur créé avec succès - ID: {}, Email: {}, Rôle: {}", userId, email, role);
