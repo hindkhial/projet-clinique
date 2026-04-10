@@ -4,6 +4,7 @@ import com.ehei.staff.DTOS.medecin.MedecinCreateRequestDto;
 import com.ehei.staff.DTOS.medecin.MedecinResponseDto;
 import com.ehei.staff.DTOS.medecin.MedecinUpdateRequestDto;
 import com.ehei.staff.services.MedecinService;
+import com.ehei.staff.utils.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -151,6 +152,16 @@ public class MedecinController {
     ){
         MedecinResponseDto response = medecinService.updateById(Long.valueOf(id), requestDto);
         return ResponseEntity.ok().body(com.ehei.staff.DTOS.ApiResponse.success(response,"Medecin modifie avec succes."));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<com.ehei.staff.DTOS.ApiResponse<MedecinResponseDto>> getMe(
+            @RequestHeader("X-Internal-Id") Long staffId,
+            @RequestHeader("X-User-Roles") String rolesHeader
+    ) {
+        SecurityUtils.requireRole(rolesHeader, "MEDECIN");
+        MedecinResponseDto response = medecinService.getByStaffId(staffId); // 👈 staffId
+        return ResponseEntity.ok().body(com.ehei.staff.DTOS.ApiResponse.success(response));
     }
 
 }
