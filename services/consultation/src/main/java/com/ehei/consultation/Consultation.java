@@ -1,23 +1,20 @@
 package com.ehei.consultation;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.Id;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
 
 import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "consultations")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
 public class Consultation {
+
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Long idPatient;
@@ -26,11 +23,24 @@ public class Consultation {
 
     private Long idRdv;
 
-    private LocalDateTime dateConsultation;
+    private String idRadio;
+
+    private Long idAnalyse;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ConsultationType type;
+
+    private String typeMaladie;
+    private Double confidence;
+    private String riskLevel;
+
 
     @Column(columnDefinition = "TEXT")
     private String observation;
 
     @Column(columnDefinition = "TEXT")
     private String traitement;
+
+    private LocalDateTime dateConsultation;
 }

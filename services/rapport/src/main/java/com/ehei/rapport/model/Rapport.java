@@ -22,12 +22,10 @@ public class Rapport {
     @Column(nullable = false)
     private Long patientId;
 
-    @Column(nullable = false)
     private Long medecinId;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TypeRapport typeRapport;
+    private String typeRapport;
 
     @Column(nullable = false)
     private LocalDateTime dateRapport;
@@ -53,10 +51,10 @@ public class Rapport {
     @Column(columnDefinition = "TEXT")
     private String diagnostic;
 
-    // Référence à la consultation source (optionnel)
+    // Référence à la consultation source
     private Long consultationId;
 
-    //url du fichier PDF dans MinIO
+    // URL du fichier PDF dans MinIO
     private String pdfFileUrl;
 
     @Column(nullable = false, updatable = false)
@@ -76,7 +74,3 @@ public class Rapport {
         updatedAt = LocalDateTime.now();
     }
 }
-
-
-
-

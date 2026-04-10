@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package ai.events;
+
+option java_package = "com.ehei.ai.proto";
+option java_multiple_files = true;
+
+message AIPredictionEvent {
+  string radio_id                  = 1;
+  string patient_id                = 2;
+  string radiologue_id             = 3;
+  string fichier_radio_url         = 4;
+  string heatmap_url               = 5;
+  string type_maladie              = 6;
+  double confidence                = 7;
+  string risk_level                = 8;
+  bool   model_agreement           = 9;
+  string date_radio                = 10;
+  string densenet_prediction       = 11;
+  double densenet_confidence       = 12;
+  string efficientnet_prediction   = 13;
+  double efficientnet_confidence   = 14;
+  string probabilities             = 15;
+}

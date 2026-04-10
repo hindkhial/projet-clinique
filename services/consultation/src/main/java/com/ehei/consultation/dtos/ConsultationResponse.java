@@ -1,5 +1,6 @@
 package com.ehei.consultation.dtos;
 
+import com.ehei.consultation.ConsultationType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,6 +21,11 @@ import java.time.LocalDateTime;
         private Long idMedecin;
 
         private Long idRdv;
+        private ConsultationType type;
+
+        private String typeMaladie;
+        private Double confidence;
+        private String riskLevel;
 
         private String observation;
 

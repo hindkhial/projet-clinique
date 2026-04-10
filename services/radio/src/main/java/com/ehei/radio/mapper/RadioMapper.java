@@ -30,6 +30,12 @@ public class RadioMapper {
                 .notes(radio.getNotes())
                 .createdAt(radio.getCreatedAt())
                 .updatedAt(radio.getUpdatedAt())
+                .status(radio.getStatus() != null ? radio.getStatus().name() : null)
+                .typeMaladie(radio.getTypeMaladie())
+                .confidence(radio.getConfidence())
+                .riskLevel(radio.getRiskLevel())
+                .heatmapUrl(radio.getHeatmapUrl())
+                .notesRadiologue(radio.getNotesRadiologue())
                 .build();
     }
 }
