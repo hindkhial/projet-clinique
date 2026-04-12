@@ -1,0 +1,80 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+      <div class="card shadow-lg">
+        <div class="card-body p-5">
+          <h2 class="card-title text-center mb-4">Login</h2>
+
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+            <!-- username Field -->
+            <div class="mb-3">
+              <label for="username" class="form-label">Username</label>
+              <input
+                type="text"
+                class="form-control"
+                id="username"
+                formControlName="username"
+                [class.is-invalid]="submitted && f['username'].errors"
+                placeholder="Enter your username"
+              />
+              @if (submitted && f['username'].errors) {
+                <div class="invalid-feedback d-block">
+                  @if (f['username'].hasError('required')) {
+                    <span>Username is required</span>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Password Field -->
+            <div class="mb-3">
+              <label for="password" class="form-label">Password</label>
+              <input
+                type="password"
+                class="form-control"
+                id="password"
+                formControlName="password"
+                [class.is-invalid]="submitted && f['password'].errors"
+                placeholder="Enter your password"
+              />
+              @if (submitted && f['password'].errors) {
+                <div class="invalid-feedback d-block">
+                  @if (f['password'].hasError('required')) {
+                    <span>Password is required</span>
+                  }
+                  @if (f['password'].hasError('minlength')) {
+                    <span>Password must be at least 6 characters</span>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary w-100 mb-2">Login</button>
+
+            <!-- Reset Button -->
+            <button
+              type="button"
+              class="btn btn-outline-secondary w-100"
+              (click)="resetForm()"
+            >
+              Clear
+            </button>
+          </form>
+
+          <!-- Footer Links -->
+          <hr class="my-4" />
+          <div class="text-center">
+            <p class="mb-0">
+              Don't have an account?
+              <a href="#" class="text-decoration-none">Sign up here</a>
+            </p>
+            <p>
+              <a href="#" class="text-decoration-none text-muted">Forgot password?</a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -4,6 +4,7 @@ import com.ehei.staff.DTOS.Staff.StaffCreateRequestDto;
 import com.ehei.staff.DTOS.Staff.StaffResponseDto;
 import com.ehei.staff.DTOS.Staff.StaffUpdateRequestDto;
 import com.ehei.staff.services.StaffService;
+import com.ehei.staff.utils.SecurityUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -153,5 +154,17 @@ public class StaffController {
     ){
         staffService.deleteById(Long.valueOf(id));
         return ResponseEntity.ok().body(com.ehei.staff.DTOS.ApiResponse.success("staff supprime avec succes."));
+    }
+
+    // StaffController — ajouter cet endpoint
+
+    @GetMapping("/me")
+    public ResponseEntity<com.ehei.staff.DTOS.ApiResponse<StaffResponseDto>> getMe(
+            @RequestHeader("X-Internal-Id") Long id,
+            @RequestHeader("X-User-Roles") String rolesHeader
+    ) {
+        SecurityUtils.requireRole(rolesHeader, "STAFF");
+        StaffResponseDto response = staffService.getById(id);
+        return ResponseEntity.ok().body(com.ehei.staff.DTOS.ApiResponse.success(response));
     }
 }
