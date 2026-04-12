@@ -27,4 +27,28 @@ export const routes: Routes = [
       },
     ],
   },
+
+  {
+    path: 'admin',
+    loadComponent: () =>
+      import('./admin/layout/admin-layout/admin-layout').then(m => m.AdminLayout),
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      // {
+      //   path: 'dashboard',
+      //   loadComponent: () =>
+      //     import('./admin/dashboard/dashboard').then(m => m.Dashboard),
+      // },
+      // {
+      //   path: 'medecins',
+      //   loadComponent: () =>
+      //     import('./admin/medecins/liste/liste').then(m => m.Liste),
+      // },
+      // {
+      //   path: 'staff',
+      //   loadComponent: () =>
+      //     import('./admin/staff/liste/liste').then(m => m.Liste),
+      // },
+    ],
+  },
 ];

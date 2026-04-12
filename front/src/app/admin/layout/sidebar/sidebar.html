@@ -1,0 +1,64 @@
+<nav class="d-flex flex-column flex-shrink-0 p-3 bg-body-tertiary border-end"
+     style="width: 260px; min-height: 100vh;">
+
+  <a class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-body-emphasis text-decoration-none">
+    <i class="bi bi-hospital fs-4 me-2"></i>
+    <span class="fs-5 fw-semibold">Clinique</span>
+  </a>
+
+  <hr>
+
+  <ul class="nav nav-pills flex-column mb-auto gap-1">
+
+    <li class="nav-item">
+      <a routerLink="/admin/dashboard"
+         routerLinkActive="active"
+         class="nav-link link-body-emphasis">
+        <i class="bi bi-speedometer2 me-2"></i>
+        Dashboard
+      </a>
+    </li>
+
+    <li>
+      <span class="nav-link text-muted small px-2 py-1 text-uppercase fw-semibold"
+            style="font-size: 0.7rem; letter-spacing: .05em;">
+        Staff
+      </span>
+    </li>
+
+    <li class="nav-item">
+      <a routerLink="/admin/medecins"
+         routerLinkActive="active"
+         class="nav-link link-body-emphasis">
+        <i class="bi bi-person-badge me-2"></i>
+        Médecins
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a routerLink="/admin/staff"
+         routerLinkActive="active"
+         class="nav-link link-body-emphasis">
+        <i class="bi bi-people me-2"></i>
+        Staff
+      </a>
+    </li>
+
+  </ul>
+
+  <hr>
+
+  <div class="dropdown">
+    <a href="#" class="d-flex align-items-center link-body-emphasis text-decoration-none dropdown-toggle"
+       data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="bi bi-person-circle fs-5 me-2"></i>
+      <strong>Administrateur</strong>
+    </a>
+    <ul class="dropdown-menu text-small shadow">
+      <li><a class="dropdown-item text-danger" routerLink="/login">
+        <i class="bi bi-box-arrow-left me-2"></i>Déconnexion
+      </a></li>
+    </ul>
+  </div>
+
+</nav>
