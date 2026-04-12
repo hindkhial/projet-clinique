@@ -1,0 +1,34 @@
+<div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,.5)">
+  <div class="modal-dialog modal-sm">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Confirmer la suppression</h5>
+        <button type="button" class="btn-close" (click)="cancelled.emit()"></button>
+      </div>
+
+      <div class="modal-body">
+        @if (deleteError()) {
+          <div class="alert alert-danger">{{ deleteError() }}</div>
+        }
+        <p>
+          Supprimer <strong>{{ staff().nom }} {{ staff().prenom }}</strong> ?
+          Cette action est irréversible.
+        </p>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancelled.emit()">Annuler</button>
+        <button type="button" class="btn btn-danger"
+                [disabled]="isDeleting()"
+                (click)="confirm()">
+          @if (isDeleting()) {
+            <span class="spinner-border spinner-border-sm me-2"></span>
+          }
+          Supprimer
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

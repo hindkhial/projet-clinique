@@ -156,8 +156,6 @@ public class StaffController {
         return ResponseEntity.ok().body(com.ehei.staff.DTOS.ApiResponse.success("staff supprime avec succes."));
     }
 
-    // StaffController — ajouter cet endpoint
-
     @GetMapping("/me")
     public ResponseEntity<com.ehei.staff.DTOS.ApiResponse<StaffResponseDto>> getMe(
             @RequestHeader("X-Internal-Id") Long id,

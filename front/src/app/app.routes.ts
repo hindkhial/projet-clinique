@@ -10,11 +10,6 @@ export const routes: Routes = [
       import('./receptionniste/layout/receptionniste-layout/receptionniste-layout').then(m => m.ReceptionnisteLayout),
     children: [
       { path: '', redirectTo: 'patients/recherche', pathMatch: 'full' },
-      // {
-      //   path: 'dashboard',
-      //   loadComponent: () =>
-      //     import('./receptionniste/dashboard/dashboard').then(m => m.Dashboard),
-      // },
       {
         path: 'patients/nouveau',
         loadComponent: () =>
@@ -24,6 +19,35 @@ export const routes: Routes = [
         path: 'patients/recherche',
         loadComponent: () =>
           import('./receptionniste/patients/recherche/recherche').then(m => m.Recherche),
+      },
+    ],
+  },
+
+  {
+    path: 'admin',
+    loadComponent: () =>
+      import('./admin/layout/admin-layout/admin-layout').then(m => m.AdminLayout),
+    children: [
+      { path: '', redirectTo: 'staff', pathMatch: 'full' },
+      {
+        path: 'staff',
+        loadComponent: () =>
+          import('./admin/staff/liste/liste').then(m => m.Liste),
+      },
+      {
+        path: 'staff/nouveau',
+        loadComponent: () =>
+          import('./admin/staff/nouveau/nouveau').then(m => m.Nouveau),
+      },
+      {
+        path: 'medecins',
+        loadComponent: () =>
+          import('./admin/medecins/liste/liste').then(m => m.Liste),
+      },
+      {
+        path: 'medecins/nouveau',
+        loadComponent: () =>
+          import('./admin/medecins/nouveau/nouveau').then(m => m.Nouveau),
       },
     ],
   },

@@ -1,0 +1,89 @@
+<div class="container py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">Staff</h4>
+    <a routerLink="/admin/staff/nouveau" class="btn btn-primary">
+      + Nouveau membre
+    </a>
+  </div>
+
+  <div class="mb-3">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Rechercher par nom, prénom ou email..."
+      [value]="searchTerm()"
+      (input)="searchTerm.set($any($event.target).value)"
+    />
+  </div>
+
+  @if (staffResource.isLoading()) {
+    <div class="d-flex align-items-center gap-2 text-secondary">
+      <span class="spinner-border spinner-border-sm"></span>
+      <span>Chargement...</span>
+    </div>
+  }
+
+  @if (staffResource.error()) {
+    <div class="alert alert-danger">Erreur lors du chargement du staff.</div>
+  }
+
+  @if (filteredStaff().length > 0) {
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+      <tr>
+        <th>Nom</th>
+        <th>Prénom</th>
+        <th>Email</th>
+        <th>Téléphone</th>
+        <th>Date de naissance</th>
+        <th>Rôle</th>
+        <th>Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+        @for (membre of filteredStaff(); track membre.id) {
+          <tr>
+            <td>{{ membre.nom }}</td>
+            <td>{{ membre.prenom }}</td>
+            <td>{{ membre.email }}</td>
+            <td>{{ membre.tel }}</td>
+            <td>{{ membre.dateNaissance }}</td>
+            <td><span class="badge bg-secondary">{{ membre.role }}</span></td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary me-2"
+                      (click)="editingStaff.set(membre)">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger"
+                      (click)="deletingStaff.set(membre)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+  @if (!staffResource.isLoading() && filteredStaff().length === 0) {
+    <div class="alert alert-info">Aucun membre du staff trouvé.</div>
+  }
+
+</div>
+
+@if (editingStaff()) {
+  <app-edit-modal
+    [staff]="editingStaff()!"
+    (saved)="editingStaff.set(null); staffResource.reload()"
+    (cancelled)="editingStaff.set(null)"
+  />
+}
+
+@if (deletingStaff()) {
+  <app-delete-modal
+    [staff]="deletingStaff()!"
+    (deleted)="deletingStaff.set(null); staffResource.reload()"
+    (cancelled)="deletingStaff.set(null)"
+  />
+}
