@@ -79,4 +79,16 @@ public class ConsultationService {
                 .orElseThrow(() -> new EntityNotFoundException("Aucune consultation n'existe avec id: " + id));
         consultationRepository.delete(consultation);
     }
+
+
+    public List<ConsultationResponse> getByIdPatient(Long idPatient) {
+        List<Consultation> list = consultationRepository.findByIdPatient(idPatient);
+        return consultationMapper.toResponseDto(list);
+    }
+
+    public List<ConsultationResponse> getByIdMedecin(Long idMedecin) {
+        List<Consultation> list = consultationRepository.findByIdMedecin(idMedecin);
+        return consultationMapper.toResponseDto(list);
+    }
+
 }
