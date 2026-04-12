@@ -11,7 +11,7 @@ const REFRESH_TOKEN_KEY = 'refresh_token';
 
 const REDIRECT_MAP: Record<string, string> = {
   PATIENT:        '/patient/dashboard',
-  RECEPTIONNISTE: '/receptionniste/dashboard',
+  RECEPTIONNISTE: '/receptionniste/patients/recherche',
   TECHNICIEN:     '/technicien/radios/upload',
   RADIOLOGUE:     '/radiologue/radios',
   MEDECIN:        '/medecin/dashboard',

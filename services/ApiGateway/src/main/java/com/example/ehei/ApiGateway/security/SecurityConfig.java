@@ -1,6 +1,7 @@
 package com.example.ehei.ApiGateway.security;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
@@ -32,11 +33,14 @@ public class SecurityConfig {
         return source;
     }
 
+    @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")
+    private String jwkSetUri;
+
     @Bean
     public ReactiveJwtDecoder jwtDecoder() {
-        log.info(">>> ReactiveJwtDecoder bean initialisé");
+        log.info(">>> ReactiveJwtDecoder bean initialisé avec: {}", jwkSetUri);
         return NimbusReactiveJwtDecoder
-                .withJwkSetUri("http://keycloak:8080/realms/hospital-realm/protocol/openid-connect/certs")
+                .withJwkSetUri(jwkSetUri)
                 .build();
     }
 
