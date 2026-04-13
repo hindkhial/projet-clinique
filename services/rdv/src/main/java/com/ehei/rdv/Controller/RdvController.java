@@ -15,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -155,5 +157,28 @@ public class RdvController {
     ){
         rdvService.deleteById(Long.valueOf(id));
         return  ResponseEntity.ok().body(com.ehei.rdv.DTO.ApiResponse.success("rdv supprime avec succes."));
+    }
+
+    @GetMapping("/patient/{idPatient}")
+    public ResponseEntity<com.ehei.rdv.DTO.ApiResponse<List<RdvResponseDto>>> getByPatient(
+            @PathVariable String idPatient) {
+        return ResponseEntity.ok(com.ehei.rdv.DTO.ApiResponse.success(
+                rdvService.getRdvByPatient(Long.valueOf(idPatient))));
+    }
+
+    @GetMapping("/medecin/{idMedecin}")
+    public ResponseEntity<com.ehei.rdv.DTO.ApiResponse<List<RdvResponseDto>>> getByMedecin(
+            @PathVariable String idMedecin) {
+        return ResponseEntity.ok(com.ehei.rdv.DTO.ApiResponse.success(
+                rdvService.getRdvByMedecin(Long.valueOf(idMedecin))));
+    }
+
+    @GetMapping("/disponibilites/{idMedecin}")
+    public ResponseEntity<com.ehei.rdv.DTO.ApiResponse<List<LocalDateTime>>> getDisponibilites(
+            @PathVariable String idMedecin,
+            @RequestParam String date) {
+        LocalDate localDate = LocalDate.parse(date); // format attendu : yyyy-MM-dd
+        return ResponseEntity.ok(com.ehei.rdv.DTO.ApiResponse.success(
+                rdvService.getDisponibilites(Long.valueOf(idMedecin), localDate)));
     }
 }

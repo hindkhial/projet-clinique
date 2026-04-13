@@ -2,10 +2,7 @@ package com.ehei.rdv.Handler;
 
 
 import com.ehei.rdv.DTO.ApiResponse;
-import com.ehei.rdv.Exceptions.CreneauIndisponibleException;
-import com.ehei.rdv.Exceptions.EntityNotFoundException;
-import com.ehei.rdv.Exceptions.MedecinNotFoundException;
-import com.ehei.rdv.Exceptions.PatientNotFoundException;
+import com.ehei.rdv.Exceptions.*;
 import feign.FeignException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
@@ -70,6 +67,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CreneauIndisponibleException.class)
     public ResponseEntity<String> handleCreneau(CreneauIndisponibleException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(HoraireInvalideException.class)
+    public ResponseEntity<ApiResponse<Void>> handleHoraireInvalide(HoraireInvalideException ex) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.error(ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
