@@ -3,7 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { StaffResponseDto, StaffUpdateRequestAuth } from '../../../models/staff.models';
 import { StaffService } from '../../../services/staff.service';
 import { extractApiError } from '../../../../shared/utils/api-error.util';
-import { Role } from '../../../../shared/models/emuns';
+import { Role } from '../../../../shared/models/enums';
 
 @Component({
   selector: 'app-edit-modal',

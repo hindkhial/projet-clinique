@@ -1,4 +1,4 @@
-import { Role, Specialite } from '../../shared/models/emuns';
+import { Role, Specialite } from '../../shared/models/enums';
 
 // ── READ (staff service) ────────────────────────────────────
 export interface MedecinResponseDto {
@@ -35,6 +35,6 @@ export interface MedecinUpdateRequestAuth {
 }
 
 export interface MedecinAccountResult {
-  medecin: MedecinResponseDto;
+  staff: MedecinResponseDto;
   keycloakUserId: string;
 }

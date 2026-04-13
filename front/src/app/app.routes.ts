@@ -10,11 +10,7 @@ export const routes: Routes = [
       import('./receptionniste/layout/receptionniste-layout/receptionniste-layout').then(m => m.ReceptionnisteLayout),
     children: [
       { path: '', redirectTo: 'patients/recherche', pathMatch: 'full' },
-      {
-        path: 'patients/nouveau',
-        loadComponent: () =>
-          import('./receptionniste/patients/nouveau/nouveau').then(m => m.Nouveau),
-      },
+
       {
         path: 'patients/recherche',
         loadComponent: () =>
@@ -34,21 +30,13 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./admin/staff/liste/liste').then(m => m.Liste),
       },
-      {
-        path: 'staff/nouveau',
-        loadComponent: () =>
-          import('./admin/staff/nouveau/nouveau').then(m => m.Nouveau),
-      },
+
       {
         path: 'medecins',
         loadComponent: () =>
           import('./admin/medecins/liste/liste').then(m => m.Liste),
       },
-      {
-        path: 'medecins/nouveau',
-        loadComponent: () =>
-          import('./admin/medecins/nouveau/nouveau').then(m => m.Nouveau),
-      },
+
     ],
   },
 ];

@@ -2,9 +2,15 @@
 
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h4 class="mb-0">Staff</h4>
-    <a routerLink="/admin/staff/nouveau" class="btn btn-primary">
-      + Nouveau membre
-    </a>
+    @if (successMessage()) {
+      <div class="alert alert-success alert-dismissible">
+        {{ successMessage() }}
+        <button type="button" class="btn-close" (click)="successMessage.set(null)"></button>
+      </div>
+    }
+    <button class="btn btn-primary" (click)="creatingStaff.set(true)">
+      + Nouveau patient
+    </button>
   </div>
 
   <div class="mb-3">
@@ -77,6 +83,13 @@
     [staff]="editingStaff()!"
     (saved)="editingStaff.set(null); staffResource.reload()"
     (cancelled)="editingStaff.set(null)"
+  />
+}
+
+@if (creatingStaff()) {
+  <app-create-modal
+    (created)="creatingStaff.set(false); onCreated($event)"
+    (cancelled)="creatingStaff.set(false)"
   />
 }
 

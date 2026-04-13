@@ -1,22 +1,26 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, output, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { PatientService } from '../../../shared/services/patient.service';
-import { PatientAccountResult } from '../../../shared/models/patient.model';
-import { extractApiError } from '../../../shared/utils/api-error.util';
+import { StaffService } from '../../../services/staff.service';
+import { extractApiError } from '../../../../shared/utils/api-error.util';
+import { Role } from '../../../../shared/models/enums';
 
 @Component({
-  selector: 'app-nouveau',
+  selector: 'app-create-modal',
+  standalone: true,
   imports: [ReactiveFormsModule],
-  templateUrl: './nouveau.html',
-  standalone: true
+  templateUrl: './create-modal.html',
 })
-export class Nouveau {
+export class CreateModal {
   private fb = inject(FormBuilder);
-  private patientService = inject(PatientService);
+  private staffService = inject(StaffService);
+
+  created = output<string>();
+  cancelled = output<void>();
 
   isSubmitting = signal(false);
   submitError = signal<string | null>(null);
-  createdResult = signal<PatientAccountResult | null>(null);
+
+  roles: Role[] = ['MEDECIN', 'RECEPTIONNISTE', 'TECHNICIEN'];
 
   form = this.fb.group({
     nom:           ['', Validators.required],
@@ -24,24 +28,18 @@ export class Nouveau {
     tel:           ['', [Validators.required, Validators.pattern(/^0[1-9]\d{8}$/)]],
     email:         ['', [Validators.required, Validators.email]],
     dateNaissance: ['', Validators.required],
+    role:          ['' as Role, Validators.required],
+    password:      ['', [Validators.required, Validators.minLength(8)]],
   });
 
   submit(): void {
     if (this.form.invalid) return;
     this.isSubmitting.set(true);
     this.submitError.set(null);
-    this.createdResult.set(null);
 
-    const payload = {
-      ...this.form.value as any,
-      password: 'password',
-    };
-
-    this.patientService.create(payload).subscribe({
+    this.staffService.create(this.form.value as any).subscribe({
       next: (result) => {
-        this.createdResult.set(result);
-        this.isSubmitting.set(false);
-        this.form.reset();
+        this.created.emit(`Membre ${result.staff.nom} ${result.staff.prenom} créé avec succès.`);
       },
       error: (err) => {
         this.submitError.set(extractApiError(err));

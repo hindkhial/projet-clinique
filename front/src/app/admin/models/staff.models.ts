@@ -1,4 +1,4 @@
-import { Role } from '../../shared/models/emuns';
+import { Role } from '../../shared/models/enums';
 
 // ── READ (staff service) ────────────────────────────────────
 export interface StaffResponseDto {
