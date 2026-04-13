@@ -16,6 +16,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./receptionniste/patients/recherche/recherche').then(m => m.Recherche),
       },
+      {
+        path: 'rdv',
+        loadComponent: () =>
+          import('./receptionniste/rdv/liste/liste').then(m => m.RdvListe),
+      },
     ],
   },
 
