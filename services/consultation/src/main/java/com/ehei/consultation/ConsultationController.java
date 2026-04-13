@@ -154,4 +154,48 @@ public class ConsultationController {
                 com.ehei.consultation.dtos.ApiResponse.success("consultation supprimee avec succes.")
         );
     }
+
+
+    @GetMapping("/patient/{idPatient}")
+    @Operation(
+            summary = "Get consultations by patient",
+            description = "Retrieves all consultations (normal, radio, analyses) for a given patient"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully retrieved consultations for the patient",
+                    content = @Content(schema = @Schema(implementation = List.class))
+            )
+    })
+    public ResponseEntity<com.ehei.consultation.dtos.ApiResponse<List<ConsultationResponse>>> getByIdPatient(
+            @Parameter(description = "ID of the patient", required = true)
+            @PathVariable Long idPatient
+    ) {
+        return ResponseEntity.ok(
+                com.ehei.consultation.dtos.ApiResponse.success(consultationService.getByIdPatient(idPatient))
+        );
+    }
+
+    @GetMapping("/medecin/{idMedecin}")
+    @Operation(
+            summary = "Get consultations by doctor",
+            description = "Retrieves all consultations handled by a given doctor"
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successfully retrieved consultations for the doctor",
+                    content = @Content(schema = @Schema(implementation = List.class))
+            )
+    })
+    public ResponseEntity<com.ehei.consultation.dtos.ApiResponse<List<ConsultationResponse>>> getByIdMedecin(
+            @Parameter(description = "ID of the doctor", required = true)
+            @PathVariable Long idMedecin
+    ) {
+        return ResponseEntity.ok(
+                com.ehei.consultation.dtos.ApiResponse.success(consultationService.getByIdMedecin(idMedecin))
+        );
+    }
+
 }

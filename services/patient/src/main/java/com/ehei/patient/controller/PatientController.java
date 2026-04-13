@@ -45,10 +45,8 @@ public class PatientController {
             )
     })
     public ResponseEntity<com.ehei.patient.dto.ApiResponse<PatientResponse>> create(
-            @RequestHeader("X-User-Roles") String rolesHeader,
             @RequestBody @Valid PatientCreateRequeste patientDto
     ){
-        SecurityUtils.requireRole(rolesHeader, "STAFF");
         PatientResponse response = patientService.createPatient(patientDto);
         return ResponseEntity.ok().body(com.ehei.patient.dto.ApiResponse.success(response,
                 "patient creee avec succes."));
@@ -67,9 +65,10 @@ public class PatientController {
             )
     })
     public ResponseEntity<com.ehei.patient.dto.ApiResponse<List<PatientResponse>>> getAllPatients(
-            @RequestHeader("X-User-Roles") String rolesHeader
+//            @RequestHeader("X-User-Roles") String rolesHeader
     ){
-        SecurityUtils.requireRole(rolesHeader, "STAFF");
+        //todo: fix composite roles keycloak
+//        SecurityUtils.requireRole(rolesHeader, "STAFF");
         List<PatientResponse> response = patientService.getAll();
         return ResponseEntity.ok().body(com.ehei.patient.dto.ApiResponse.success(response));
     }
@@ -154,11 +153,9 @@ public class PatientController {
     })
     public ResponseEntity<com.ehei.patient.dto.ApiResponse<String>> deletePatient(
             @Parameter(description = "ID of the patient to delete", required = true)
-            @PathVariable String id,
-            @RequestHeader("X-User-Roles") String rolesHeader
+            @PathVariable String id
 
     ){
-        SecurityUtils.requireRole(rolesHeader, "STAFF");
         patientService.deleteById(Long.valueOf(id));
         return ResponseEntity.ok().body(com.ehei.patient.dto.ApiResponse.success("patient supprime avec succes."));
     }

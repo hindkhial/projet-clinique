@@ -1,5 +1,6 @@
 package com.example.ehei.ApiGateway.security;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +11,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtAut
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Configuration
 public class GatewayConfig {
 
@@ -54,6 +56,8 @@ public class GatewayConfig {
                             .header("X-User-Email", email != null ? email : "")
                             .header("X-User-Roles", String.join(",", roles)) // ex: "DOCTOR,ADMIN"
                             .build();
+
+                    log.info(mutatedRequest.getHeaders().toString());
 
                     // on transmet la requête modifiée à la suite de la chaîne de filtres
                     return chain.filter(exchange.mutate().request(mutatedRequest).build());

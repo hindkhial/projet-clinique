@@ -1,0 +1,92 @@
+<div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,.5)">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">Modifier le membre</h5>
+        <button type="button" class="btn-close" (click)="cancelled.emit()"></button>
+      </div>
+
+      <div class="modal-body">
+        <form [formGroup]="form">
+
+          <div class="row g-3">
+
+            <div class="col-6">
+              <label class="form-label">Nom <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" formControlName="nom"
+                     [class.is-invalid]="form.get('nom')?.invalid && form.get('nom')?.touched" />
+              <div class="invalid-feedback">Nom obligatoire.</div>
+            </div>
+
+            <div class="col-6">
+              <label class="form-label">Prénom <span class="text-danger">*</span></label>
+              <input type="text" class="form-control" formControlName="prenom"
+                     [class.is-invalid]="form.get('prenom')?.invalid && form.get('prenom')?.touched" />
+              <div class="invalid-feedback">Prénom obligatoire.</div>
+            </div>
+
+            <div class="col-6">
+              <label class="form-label">Téléphone <span class="text-danger">*</span></label>
+              <input type="tel" class="form-control" formControlName="tel"
+                     placeholder="0612345678"
+                     [class.is-invalid]="form.get('tel')?.invalid && form.get('tel')?.touched" />
+              <div class="invalid-feedback">Numéro invalide (format : 0XXXXXXXXX).</div>
+            </div>
+
+            <div class="col-6">
+              <label class="form-label">Email <span class="text-danger">*</span></label>
+              <input type="email" class="form-control" formControlName="email"
+                     [class.is-invalid]="form.get('email')?.invalid && form.get('email')?.touched" />
+              <div class="invalid-feedback">Email invalide.</div>
+            </div>
+
+            <div class="col-6">
+              <label class="form-label">Date de naissance <span class="text-danger">*</span></label>
+              <input type="date" class="form-control" formControlName="dateNaissance"
+                     [class.is-invalid]="form.get('dateNaissance')?.invalid && form.get('dateNaissance')?.touched" />
+              <div class="invalid-feedback">Date de naissance obligatoire.</div>
+            </div>
+
+            <div class="col-6">
+              <label class="form-label">Rôle <span class="text-danger">*</span></label>
+              <select class="form-select" formControlName="role"
+                      [class.is-invalid]="form.get('role')?.invalid && form.get('role')?.touched">
+                <option value="" disabled>Sélectionner un rôle</option>
+                @for (role of roles; track role) {
+                  <option [value]="role">{{ role }}</option>
+                }
+              </select>
+              <div class="invalid-feedback">Rôle obligatoire.</div>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Nouveau mot de passe <span class="text-muted">(optionnel)</span></label>
+              <input type="password" class="form-control" formControlName="password"
+                     placeholder="Laisser vide pour ne pas modifier" />
+            </div>
+
+          </div>
+
+        </form>
+
+        @if (submitError()) {
+          <div class="alert alert-danger mt-3">{{ submitError() }}</div>
+        }
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="cancelled.emit()">Annuler</button>
+        <button type="button" class="btn btn-primary"
+                [disabled]="form.invalid || isSubmitting()"
+                (click)="submit()">
+          @if (isSubmitting()) {
+            <span class="spinner-border spinner-border-sm me-2"></span>
+          }
+          Enregistrer
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
