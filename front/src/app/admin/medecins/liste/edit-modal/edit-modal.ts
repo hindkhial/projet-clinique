@@ -3,7 +3,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MedecinResponseDto, MedecinUpdateRequestAuth } from '../../../models/medecin.models';
 import { MedecinService } from '../../../services/medecin.service';
 import { extractApiError } from '../../../../shared/utils/api-error.util';
-import { Specialite } from '../../../../shared/models/emuns';
+import { Specialite } from '../../../../shared/models/enums';
 
 @Component({
   selector: 'app-edit-modal',

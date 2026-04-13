@@ -2,9 +2,9 @@
 
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h4 class="mb-0">Patients</h4>
-    <a routerLink="/receptionniste/patients/nouveau" class="btn btn-primary">
+    <button class="btn btn-primary" (click)="creatingPatient.set(true)">
       + Nouveau patient
-    </a>
+    </button>
   </div>
 
   <div class="mb-3">
@@ -86,3 +86,11 @@
     (cancelled)="deletingPatient.set(null)"
   />
 }
+
+@if (creatingPatient()) {
+  <app-create-modal
+    (created)="creatingPatient.set(false); onCreated($event)"
+    (cancelled)="creatingPatient.set(false)"
+  />
+}
+
