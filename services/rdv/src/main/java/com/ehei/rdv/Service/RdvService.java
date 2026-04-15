@@ -5,10 +5,7 @@ import com.ehei.rdv.DTO.rdv.RdvCreateRequestDto;
 import com.ehei.rdv.DTO.rdv.RdvResponseDto;
 import com.ehei.rdv.DTO.rdv.RdvUpdateRequestDto;
 import com.ehei.rdv.DTO.staff.MedecinResponseDto;
-import com.ehei.rdv.Exceptions.CreneauIndisponibleException;
-import com.ehei.rdv.Exceptions.EntityNotFoundException;
-import com.ehei.rdv.Exceptions.MedecinNotFoundException;
-import com.ehei.rdv.Exceptions.PatientNotFoundException;
+import com.ehei.rdv.Exceptions.*;
 import com.ehei.rdv.Feign.MedecinClient;
 import com.ehei.rdv.Feign.PatientClient;
 import com.ehei.rdv.Mapper.RdvMapper;
@@ -19,6 +16,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -46,6 +46,9 @@ public class RdvService {
             throw new MedecinNotFoundException(requestDto.getIdMedecin());
         }
 
+        //verifie minutes :00 ou :30
+        validerHoraireRdv(requestDto.getDateRdv());
+
         if(rdvRepository.existsByIdMedecinAndDateRdv(requestDto.getIdMedecin(),requestDto.getDateRdv()))
         { throw new CreneauIndisponibleException();}
 
@@ -55,6 +58,8 @@ public class RdvService {
     }
 
     public RdvResponseDto updateRdv(Long id,RdvUpdateRequestDto requestDto) {
+
+        validerHoraireRdv(requestDto.getDateRdv());
 
         Rdv oldRdv = rdvRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Aucun rdv n'existe avec id: " + id));
@@ -83,5 +88,65 @@ public class RdvService {
         Rdv rdv = rdvRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Aucun rdv n'existe avec id: " + id));
         rdvRepository.delete(rdv);
+    }
+
+    public List<RdvResponseDto> getRdvByPatient(Long idPatient) {
+        ResponseEntity<PatientResponseDto> patientResponse = patientClient.getPatientById(idPatient);
+        if (!patientResponse.getStatusCode().is2xxSuccessful() || patientResponse.getBody() == null)
+            throw new PatientNotFoundException(idPatient);
+
+        return rdvMapper.toListeResponseDto(rdvRepository.findAllByIdPatient(idPatient));
+    }
+
+    public List<RdvResponseDto> getRdvByMedecin(Long idMedecin) {
+        ResponseEntity<MedecinResponseDto> medecinResponse = medecinClient.getMedecinById(idMedecin);
+        if (!medecinResponse.getStatusCode().is2xxSuccessful() || medecinResponse.getBody() == null)
+            throw new MedecinNotFoundException(idMedecin);
+
+        return rdvMapper.toListeResponseDto(rdvRepository.findAllByIdMedecin(idMedecin));
+    }
+
+    public List<LocalDateTime> getDisponibilites(Long idMedecin, LocalDate date) {
+        ResponseEntity<MedecinResponseDto> medecinResponse = medecinClient.getMedecinById(idMedecin);
+        if (!medecinResponse.getStatusCode().is2xxSuccessful() || medecinResponse.getBody() == null)
+            throw new MedecinNotFoundException(idMedecin);
+
+        LocalDateTime start = date.atTime(8, 0);
+        LocalDateTime end   = date.atTime(17, 0);
+
+        // Tous les créneaux possibles (08h00 → 16h30, toutes les 30 min)
+        List<LocalDateTime> tousLesCreneaux = new ArrayList<>();
+        LocalDateTime current = start;
+        while (current.isBefore(end)) {
+            tousLesCreneaux.add(current);
+            current = current.plusMinutes(30);
+        }
+
+        // Créneaux déjà pris
+        List<LocalDateTime> pris = rdvRepository
+                .findAllByIdMedecinAndDateRdvBetween(idMedecin, start, end)
+                .stream()
+                .map(Rdv::getDateRdv)
+                .toList();
+
+        tousLesCreneaux.removeAll(pris);
+        return tousLesCreneaux;
+    }
+
+    private void validerHoraireRdv(LocalDateTime dateRdv) {
+        int hour = dateRdv.getHour();
+        int minute = dateRdv.getMinute();
+
+        if (hour < 8 || hour >= 17) {
+            throw new HoraireInvalideException(
+                    "Le RDV doit être entre 08h00 et 17h00."
+            );
+        }
+
+        if (minute != 0 && minute != 30) {
+            throw new HoraireInvalideException(
+                    "Le RDV doit être sur un créneau de 30 minutes (ex: 09h00 ou 09h30)."
+            );
+        }
     }
 }

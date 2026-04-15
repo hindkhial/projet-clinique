@@ -1,0 +1,111 @@
+<div class="container py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">Rendez-vous</h4>
+    <button class="btn btn-primary" (click)="creatingRdv.set(true)">
+      + Nouveau RDV
+    </button>
+  </div>
+
+  @if (successMessage()) {
+    <div class="alert alert-success alert-dismissible">
+      {{ successMessage() }}
+    </div>
+  }
+
+  <div class="mb-3">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Rechercher par patient, médecin ou date..."
+      [value]="searchTerm()"
+      (input)="searchTerm.set($any($event.target).value)"
+    />
+  </div>
+
+  @if (rdvResource.isLoading()) {
+    <div class="d-flex align-items-center gap-2 text-secondary">
+      <span class="spinner-border spinner-border-sm"></span>
+      <span>Chargement...</span>
+    </div>
+  }
+
+  @if (rdvResource.error()) {
+    <div class="alert alert-danger">Erreur lors du chargement des rendez-vous.</div>
+  }
+
+  @if (filteredRdvs().length > 0) {
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+      <tr>
+        <th>#</th>
+        <th>Patient</th>
+        <th>Médecin</th>
+        <th>Date & heure</th>
+        <th>Statut</th>
+        <th>Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+        @for (rdv of filteredRdvs(); track rdv.id) {
+          <tr [class.text-muted]="isPast(rdv.dateRdv)">
+            <td class="text-muted small">{{ rdv.id }}</td>
+            <td>{{ getPatientName(rdv.idPatient) }}</td>
+            <td>{{ getMedecinName(rdv.idMedecin) }}</td>
+            <td>{{ formatDate(rdv.dateRdv) }}</td>
+            <td>
+              @if (isPast(rdv.dateRdv)) {
+                <span class="badge bg-secondary">Passé</span>
+              } @else {
+                <span class="badge bg-success">À venir</span>
+              }
+            </td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary me-2"
+                      [disabled]="isPast(rdv.dateRdv)"
+                      (click)="!isPast(rdv.dateRdv) && editingRdv.set(rdv)">
+                <i class="bi bi-pencil"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger"
+                      [disabled]="isPast(rdv.dateRdv)"
+                      (click)="!isPast(rdv.dateRdv) && deletingRdv.set(rdv)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+  @if (!rdvResource.isLoading() && filteredRdvs().length === 0) {
+    <div class="alert alert-info">Aucun rendez-vous trouvé.</div>
+  }
+
+</div>
+
+<!-- Modals -->
+@if (creatingRdv()) {
+  <app-rdv-create-modal
+    (created)="onCreated($event)"
+    (cancelled)="creatingRdv.set(false)"
+  />
+}
+
+@if (editingRdv()) {
+  <app-rdv-edit-modal
+    [rdv]="editingRdv()!"
+    (saved)="onSaved()"
+    (cancelled)="editingRdv.set(null)"
+  />
+}
+
+@if (deletingRdv()) {
+  <app-rdv-delete-modal
+    [rdv]="deletingRdv()!"
+    [patientName]="getPatientName(deletingRdv()!.idPatient)"
+    [medecinName]="getMedecinName(deletingRdv()!.idMedecin)"
+    (deleted)="onDeleted()"
+    (cancelled)="deletingRdv.set(null)"
+  />
+}

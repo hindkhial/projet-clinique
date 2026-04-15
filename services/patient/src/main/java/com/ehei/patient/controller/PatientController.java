@@ -92,11 +92,11 @@ public class PatientController {
     })
     public ResponseEntity<com.ehei.patient.dto.ApiResponse<PatientResponse>> getPatientById(
             @Parameter(description = "ID of the patient to retrieve", required = true)
-            @PathVariable String id,
-            @RequestHeader("X-User-Roles") String rolesHeader
+            @PathVariable String id
+//            @RequestHeader("X-User-Roles") String rolesHeader
 
     ){
-        SecurityUtils.requireRole(rolesHeader, "STAFF");
+//        SecurityUtils.requireRole(rolesHeader, "STAFF");
         PatientResponse response = patientService.getById(Long.valueOf(id));
         return ResponseEntity.ok().body(com.ehei.patient.dto.ApiResponse.success(response));
     }
