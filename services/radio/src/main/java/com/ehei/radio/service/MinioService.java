@@ -78,6 +78,30 @@ public class MinioService {
         }
     }
 
+    public InputStream downloadFileFromUrl(String fileUrl) {
+        try {
+            // fileUrl = "heatmap-bucket/heatmaps/13_gradcam.jpg"
+            String bucket = fileUrl.substring(0, fileUrl.indexOf("/"));
+            String filename = fileUrl.substring(fileUrl.indexOf("/") + 1);
+
+            log.info("Downloading file from bucket: {}, key: {}", bucket, filename);
+
+            InputStream stream = minioClient.getObject(
+                    GetObjectArgs.builder()
+                            .bucket(bucket)
+                            .object(filename)
+                            .build()
+            );
+
+            log.info("File downloaded successfully: {}", filename);
+            return stream;
+
+        } catch (Exception e) {
+            log.error("Error downloading file: {}", e.getMessage());
+            throw new RuntimeException("Failed to download file", e);
+        }
+    }
+
     /**
      * Delete radio image from MinIO
      */
