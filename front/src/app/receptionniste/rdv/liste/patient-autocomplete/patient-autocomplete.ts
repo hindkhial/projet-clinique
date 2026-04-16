@@ -10,8 +10,8 @@ import { Patient } from '../../../../shared/models/patient.model';
 })
 export class PatientAutocomplete {
   patients = input.required<Patient[]>();
-  selectedId = input<number | null>(null);
-  invalid = input<boolean>(false);
+  selectedId = input<number | null | undefined>(null);
+  invalid = input<boolean | undefined>(false);
 
   selectedIdChange = output<number | null>();
 
@@ -36,7 +36,6 @@ export class PatientAutocomplete {
   });
 
   onInputClick(): void {
-    // si un patient est déjà sélectionné, vider pour permettre nouvelle recherche
     if (this.selectedId()) {
       this.searchTerm.set('');
       this.selectedIdChange.emit(null);

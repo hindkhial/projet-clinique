@@ -1,0 +1,245 @@
+<div class="container py-4" style="max-width: 680px;">
+
+  <h4 class="mb-4">Upload d'une radio</h4>
+
+  @if (successMessage()) {
+    <div class="alert alert-success d-flex align-items-center gap-2">
+      <i class="bi bi-check-circle-fill"></i>
+      {{ successMessage() }}
+    </div>
+  }
+
+  <!-- Stepper -->
+  <div class="d-flex align-items-center mb-4">
+    @for (step of [1, 2, 3]; track step) {
+      <div class="d-flex align-items-center" [class.flex-grow-1]="step < 3">
+        <div class="rounded-circle d-flex align-items-center justify-content-center fw-semibold"
+             style="width: 32px; height: 32px; font-size: 0.85rem;"
+             [class.bg-primary]="currentStep() >= step"
+             [class.text-white]="currentStep() >= step"
+             [class.bg-body-secondary]="currentStep() < step"
+             [class.text-muted]="currentStep() < step">
+          @if (currentStep() > step) {
+            <i class="bi bi-check"></i>
+          } @else {
+            {{ step }}
+          }
+        </div>
+        <span class="ms-2 small"
+              [class.fw-semibold]="currentStep() === step"
+              [class.text-muted]="currentStep() !== step">
+          @if (step === 1) { Informations }
+          @if (step === 2) { Image }
+          @if (step === 3) { Récapitulatif }
+        </span>
+        @if (step < 3) {
+          <div class="flex-grow-1 border-top mx-3"></div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- ── ÉTAPE 1 : Infos ── -->
+  @if (currentStep() === 1) {
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+
+        <!-- Patient autocomplete -->
+        <div class="mb-3 position-relative">
+          <label class="form-label">Patient <span class="text-danger">*</span></label>
+
+          @if (selectedPatient()) {
+            <div class="d-flex align-items-center gap-2 p-2 border rounded bg-body-secondary">
+              <i class="bi bi-person-check text-primary"></i>
+              <span class="fw-semibold">{{ selectedPatient()!.nom }} {{ selectedPatient()!.prenom }}</span>
+              <span class="text-muted small">— {{ selectedPatient()!.email }}</span>
+              <button type="button" class="btn-close ms-auto" style="font-size: 0.7rem;" (click)="clearPatient()"></button>
+            </div>
+          } @else {
+            <input type="text"
+                   class="form-control"
+                   placeholder="Rechercher par nom, prénom ou email..."
+                   [formControl]="patientSearch"
+                   (focus)="showPatientDropdown.set(patientResults().length > 0)"
+                   (blur)="$event.relatedTarget || showPatientDropdown.set(false)" />
+
+            @if (showPatientDropdown()) {
+              <ul class="list-group position-absolute w-100 shadow-sm z-3" style="top: calc(100% + 4px);">
+                @for (p of patientResults(); track p.id) {
+                  <li class="list-group-item list-group-item-action"
+                      style="cursor: pointer;"
+                      (mousedown)="selectPatient(p)">
+                    <strong>{{ p.nom }} {{ p.prenom }}</strong>
+                    <span class="text-muted ms-2 small">{{ p.email }}</span>
+                  </li>
+                }
+              </ul>
+            }
+          }
+        </div>
+
+        <form [formGroup]="step1Form">
+
+          <!-- Radiologue -->
+          <div class="mb-3">
+            <label class="form-label">Radiologue <span class="text-danger">*</span></label>
+            @if (radiologuesLoading()) {
+              <div class="d-flex align-items-center gap-2 text-muted">
+                <span class="spinner-border spinner-border-sm"></span>
+                <span class="small">Chargement...</span>
+              </div>
+            } @else {
+              <select class="form-select" formControlName="radiologueId"
+                      [class.is-invalid]="step1Form.get('radiologueId')?.invalid && step1Form.get('radiologueId')?.touched">
+                <option value="">-- Sélectionner un radiologue --</option>
+                @for (r of radiologues(); track r.id) {
+                  <option [value]="r.id">Dr. {{ r.nom }} {{ r.prenom }}</option>
+                }
+              </select>
+              <div class="invalid-feedback">Radiologue obligatoire.</div>
+            }
+          </div>
+
+          <!-- Date -->
+          <div class="mb-3">
+            <label class="form-label">Date de la radio <span class="text-danger">*</span></label>
+            <input type="datetime-local" class="form-control" formControlName="dateRadio"
+                   [class.is-invalid]="step1Form.get('dateRadio')?.invalid && step1Form.get('dateRadio')?.touched" />
+            <div class="invalid-feedback">Date obligatoire.</div>
+          </div>
+
+          <!-- Notes -->
+          <div class="mb-3">
+            <label class="form-label">Notes <span class="text-muted small">(optionnel)</span></label>
+            <textarea class="form-control" formControlName="notes" rows="3"
+                      placeholder="Observations, contexte clinique..."></textarea>
+          </div>
+
+        </form>
+
+        <div class="d-flex justify-content-end">
+          <button class="btn btn-primary" (click)="goToStep2()"
+                  [disabled]="!selectedPatient() || step1Form.invalid">
+            Suivant <i class="bi bi-arrow-right ms-1"></i>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+  <!-- ── ÉTAPE 2 : Upload fichier ── -->
+  @if (currentStep() === 2) {
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+
+        <p class="text-muted mb-3">Sélectionnez ou déposez l'image radiologique.</p>
+
+        <!-- Drop zone -->
+        <div class="border rounded p-5 text-center mb-3"
+             [class.border-primary]="isDragging()"
+             [class.bg-primary-subtle]="isDragging()"
+             style="border-style: dashed !important; cursor: pointer;"
+             (dragover)="onDragOver($event)"
+             (dragleave)="onDragLeave()"
+             (drop)="onDrop($event)"
+             (click)="fileInput.click()">
+          <i class="bi bi-image fs-2 text-secondary d-block mb-2"></i>
+          <span class="text-muted">Glisser-déposer ou <strong>cliquer</strong> pour sélectionner</span>
+          <br>
+          <span class="text-muted small">JPG, PNG, DICOM acceptés</span>
+          <input #fileInput type="file" accept="image/*" class="d-none" (change)="onFileChange($event)" />
+        </div>
+
+        @if (selectedFile()) {
+          <div class="d-flex align-items-center gap-2 p-2 border rounded bg-body-secondary mb-3">
+            <i class="bi bi-file-image text-primary fs-5"></i>
+            <div class="flex-grow-1">
+              <div class="fw-semibold small">{{ selectedFile()!.name }}</div>
+              <div class="text-muted" style="font-size: 0.75rem;">
+                {{ (selectedFile()!.size / 1024).toFixed(0) }} Ko
+              </div>
+            </div>
+            <button type="button" class="btn-close" style="font-size: 0.7rem;" (click)="removeFile()"></button>
+          </div>
+        }
+
+        @if (fileError()) {
+          <div class="alert alert-danger py-2">{{ fileError() }}</div>
+        }
+
+        <div class="d-flex justify-content-between">
+          <button class="btn btn-outline-secondary" (click)="goBack()">
+            <i class="bi bi-arrow-left me-1"></i> Retour
+          </button>
+          <button class="btn btn-primary" (click)="goToStep3()" [disabled]="!selectedFile()">
+            Suivant <i class="bi bi-arrow-right ms-1"></i>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+  <!-- ── ÉTAPE 3 : Récapitulatif ── -->
+  @if (currentStep() === 3) {
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+
+        <h6 class="fw-semibold mb-3">Récapitulatif</h6>
+
+        <ul class="list-group list-group-flush mb-4">
+          <li class="list-group-item px-0 d-flex justify-content-between">
+            <span class="text-muted">Patient</span>
+            <span class="fw-semibold">{{ selectedPatient()!.nom }} {{ selectedPatient()!.prenom }}</span>
+          </li>
+          <li class="list-group-item px-0 d-flex justify-content-between">
+            <span class="text-muted">Radiologue</span>
+            <span class="fw-semibold">
+              Dr. {{ selectedRadiologue?.nom }} {{ selectedRadiologue?.prenom }}
+            </span>
+          </li>
+          <li class="list-group-item px-0 d-flex justify-content-between">
+            <span class="text-muted">Date</span>
+            <span class="fw-semibold">{{ step1Form.get('dateRadio')?.value | date:'dd/MM/yyyy HH:mm' }}</span>
+          </li>
+          @if (step1Form.get('notes')?.value) {
+            <li class="list-group-item px-0 d-flex justify-content-between">
+              <span class="text-muted">Notes</span>
+              <span>{{ step1Form.get('notes')?.value }}</span>
+            </li>
+          }
+          <li class="list-group-item px-0 d-flex justify-content-between">
+            <span class="text-muted">Fichier</span>
+            <span class="fw-semibold">
+              <i class="bi bi-file-image me-1"></i>{{ selectedFile()!.name }}
+            </span>
+          </li>
+        </ul>
+
+        <div class="alert alert-info py-2 small">
+          <i class="bi bi-info-circle me-1"></i>
+          Après soumission, l'analyse IA sera lancée automatiquement. Le radiologue sera notifié.
+        </div>
+
+        @if (submitError()) {
+          <div class="alert alert-danger">{{ submitError() }}</div>
+        }
+
+        <div class="d-flex justify-content-between">
+          <button class="btn btn-outline-secondary" (click)="goBack()" [disabled]="isSubmitting()">
+            <i class="bi bi-arrow-left me-1"></i> Retour
+          </button>
+          <button class="btn btn-primary" (click)="submit()" [disabled]="isSubmitting()">
+            @if (isSubmitting()) {
+              <span class="spinner-border spinner-border-sm me-2"></span>
+            }
+            <i class="bi bi-upload me-1"></i> Soumettre
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+</div>
