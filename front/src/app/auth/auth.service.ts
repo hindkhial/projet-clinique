@@ -105,7 +105,7 @@ export class AuthService {
     }
 
     return this.http
-      .post<TokenResponse>('/api/auth/refresh', { refreshToken })
+      .post<TokenResponse>(`${environment.apiUrl}/auth/refresh`, { refreshToken })
       .pipe(
         tap({
           next: response => {

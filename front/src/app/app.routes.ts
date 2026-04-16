@@ -44,4 +44,23 @@ export const routes: Routes = [
 
     ],
   },
+
+  {
+    path: 'technicien',
+    loadComponent: () =>
+      import('./technicien/layout/technicien-layout/technicien-layout').then(m => m.TechnicienLayout),
+    children: [
+      { path: '', redirectTo: 'radios/upload', pathMatch: 'full' },
+      {
+        path: 'radios/upload',
+        loadComponent: () =>
+          import('./technicien/radios/upload/upload').then(m => m.Upload),
+      },
+      {
+        path: 'radios/historique',
+        loadComponent: () =>
+          import('./technicien/radios/historique/historique').then(m => m.Historique),
+      },
+    ],
+  },
 ];
