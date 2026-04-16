@@ -162,10 +162,10 @@ public class PatientController {
 
     @GetMapping("/search")
     public ResponseEntity<com.ehei.patient.dto.ApiResponse<List<PatientResponse>>> searchPatients(
-            @RequestParam String q,
-            @RequestHeader("X-User-Roles") String rolesHeader
+            @RequestParam String q
+//            @RequestHeader("X-User-Roles") String rolesHeader
     ) {
-        SecurityUtils.requireRole(rolesHeader, "STAFF");
+//        SecurityUtils.requireRole(rolesHeader, "STAFF");
         List<PatientResponse> response = patientService.searchPatients(q);
         return ResponseEntity.ok().body(com.ehei.patient.dto.ApiResponse.success(response));
     }
