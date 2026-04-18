@@ -1,0 +1,263 @@
+<div class="container py-4" style="max-width: 1100px;">
+
+  <!-- Header -->
+  <div class="d-flex align-items-center gap-3 mb-4">
+    <button class="btn btn-outline-secondary btn-sm" (click)="goBack()">
+      <i class="bi bi-arrow-left me-1"></i> Retour
+    </button>
+    <div>
+      <h4 class="mb-0">Validation de radio</h4>
+      <span class="text-muted small">Confirmer ou corriger la prédiction IA</span>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="d-flex align-items-center gap-2 text-secondary">
+      <span class="spinner-border spinner-border-sm"></span>
+      <span>Chargement...</span>
+    </div>
+  }
+
+  @if (loadError()) {
+    <div class="alert alert-danger">Erreur lors du chargement de la radio.</div>
+  }
+
+  @if (submitSuccess()) {
+    <div class="alert alert-success d-flex align-items-center gap-2">
+      <i class="bi bi-check-circle-fill"></i>
+      Validation enregistrée. Redirection en cours...
+    </div>
+  }
+
+  @if (radio() && !isLoading()) {
+    <div class="row g-4">
+
+      <!-- ── Colonne gauche : images ── -->
+      <div class="col-lg-7">
+
+        <!-- Infos patient -->
+        <div class="card border-0 shadow-sm mb-3">
+          <div class="card-body p-3">
+            <div class="d-flex justify-content-between align-items-start">
+              <div>
+                <h6 class="fw-semibold mb-1">
+                  <i class="bi bi-person me-2 text-primary"></i>
+                  {{ patient() ? patient()!.nom + ' ' + patient()!.prenom : '—' }}
+                </h6>
+                <span class="text-muted small">
+                  <i class="bi bi-calendar me-1"></i>
+                  {{ radio()!.dateRadio | date:'dd/MM/yyyy HH:mm' }}
+                </span>
+              </div>
+              <span class="badge {{ riskBadge(radio()!.riskLevel) }}">
+                Risque {{ riskLabel(radio()!.riskLevel) }}
+              </span>
+            </div>
+            @if (radio()!.notes) {
+              <p class="text-muted small mt-2 mb-0">
+                <i class="bi bi-sticky me-1"></i>{{ radio()!.notes }}
+              </p>
+            }
+          </div>
+        </div>
+
+        <!-- Images -->
+        @if (imagesLoading()) {
+          <div class="d-flex align-items-center gap-2 text-secondary mb-3">
+            <span class="spinner-border spinner-border-sm"></span>
+            <span class="small">Chargement des images...</span>
+          </div>
+        }
+
+        <div class="row g-3">
+          <div class="col-6">
+            <div class="card border-0 shadow-sm">
+              <div class="card-header bg-body-secondary py-2 small fw-semibold">
+                <i class="bi bi-image me-1"></i> Image radio
+              </div>
+              <div class="card-body p-2 text-center" style="min-height: 200px;">
+                @if (radioImageUrl()) {
+                  <img [src]="radioImageUrl()!"
+                       class="img-fluid rounded"
+                       style="max-height: 280px; object-fit: contain;"
+                       alt="Image radio" />
+                } @else if (!imagesLoading()) {
+                  <span class="text-muted small">Image non disponible</span>
+                }
+              </div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="card border-0 shadow-sm">
+              <div class="card-header bg-body-secondary py-2 small fw-semibold">
+                <i class="bi bi-cpu me-1"></i> Heatmap IA
+              </div>
+              <div class="card-body p-2 text-center" style="min-height: 200px;">
+                @if (heatmapUrl()) {
+                  <img [src]="heatmapUrl()!"
+                       class="img-fluid rounded"
+                       style="max-height: 280px; object-fit: contain;"
+                       alt="Heatmap IA" />
+                } @else if (!imagesLoading()) {
+                  <span class="text-muted small">Heatmap non disponible</span>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ── Colonne droite : prédiction IA + formulaire ── -->
+      <div class="col-lg-5">
+
+        <!-- Prédiction IA -->
+        <div class="card border-0 shadow-sm mb-3">
+          <div class="card-header bg-body-secondary py-2">
+            <span class="fw-semibold small">
+              <i class="bi bi-robot me-1"></i> Prédiction IA
+            </span>
+          </div>
+          <div class="card-body p-3">
+            <div class="mb-2 d-flex justify-content-between">
+              <span class="text-muted small">Maladie détectée</span>
+              <span class="fw-semibold small">{{ radio()!.typeMaladie ?? '—' }}</span>
+            </div>
+            <div class="mb-2 d-flex justify-content-between align-items-center">
+              <span class="text-muted small">Confiance</span>
+              @if (radio()!.confidence !== null) {
+                <div class="d-flex align-items-center gap-2">
+                  <div class="progress" style="width: 80px; height: 6px;">
+                    <div class="progress-bar"
+                         [style.width.%]="(radio()!.confidence! * 100)"
+                         [class.bg-success]="radio()!.confidence! >= 0.8"
+                         [class.bg-warning]="radio()!.confidence! >= 0.5 && radio()!.confidence! < 0.8"
+                         [class.bg-danger]="radio()!.confidence! < 0.5">
+                    </div>
+                  </div>
+                  <span class="small fw-semibold">{{ (radio()!.confidence! * 100).toFixed(0) }}%</span>
+                </div>
+              } @else {
+                <span class="small text-muted">—</span>
+              }
+            </div>
+            <div class="d-flex justify-content-between">
+              <span class="text-muted small">Niveau de risque</span>
+              <span class="badge {{ riskBadge(radio()!.riskLevel) }}">
+                {{ riskLabel(radio()!.riskLevel) }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Formulaire validation -->
+        <div class="card border-0 shadow-sm">
+          <div class="card-header bg-body-secondary py-2">
+            <span class="fw-semibold small">
+              <i class="bi bi-pencil-square me-1"></i> Votre décision
+            </span>
+          </div>
+          <div class="card-body p-3">
+
+            <form [formGroup]="form">
+
+              <!-- Toggle CONFIRME / MODIFIE -->
+              <div class="mb-3">
+                <div class="btn-group w-100" role="group">
+                  <button type="button"
+                          class="btn btn-sm"
+                          [class.btn-success]="!isModifie()"
+                          [class.btn-outline-success]="isModifie()"
+                          (click)="setDecision('CONFIRME')">
+                    <i class="bi bi-check-lg me-1"></i> Confirmer
+                  </button>
+                  <button type="button"
+                          class="btn btn-sm"
+                          [class.btn-warning]="isModifie()"
+                          [class.btn-outline-warning]="!isModifie()"
+                          (click)="setDecision('MODIFIE')">
+                    <i class="bi bi-pencil me-1"></i> Modifier
+                  </button>
+                </div>
+              </div>
+
+              <!-- Champs conditionnels si MODIFIE -->
+              @if (isModifie()) {
+                <div class="mb-2">
+                  <label class="form-label small">Maladie <span class="text-danger">*</span></label>
+                  <input type="text" class="form-control form-control-sm"
+                         formControlName="typeMaladie"
+                         placeholder="Ex: Pneumonie"
+                         [class.is-invalid]="form.get('typeMaladie')?.invalid && form.get('typeMaladie')?.touched" />
+                  <div class="invalid-feedback">Champ obligatoire.</div>
+                </div>
+
+                <div class="mb-2">
+                  <label class="form-label small">
+                    Confiance
+                    @if (form.get('confidence')?.value !== null) {
+                      <span class="text-muted ms-1">
+                        ({{ ((form.get('confidence')?.value ?? 0) * 100).toFixed(0) }}%)
+                      </span>
+                    }
+                  </label>
+                  <input type="range" class="form-range"
+                         formControlName="confidence"
+                         min="0" max="1" step="0.01" />
+                </div>
+
+                <div class="mb-2">
+                  <label class="form-label small">Niveau de risque <span class="text-danger">*</span></label>
+                  <select class="form-select form-select-sm"
+                          formControlName="riskLevel"
+                          [class.is-invalid]="form.get('riskLevel')?.invalid && form.get('riskLevel')?.touched">
+                    <option value="">-- Sélectionner --</option>
+                    <option value="LOW">Faible</option>
+                    <option value="MEDIUM">Moyen</option>
+                    <option value="HIGH">Élevé</option>
+                  </select>
+                  <div class="invalid-feedback">Champ obligatoire.</div>
+                </div>
+              }
+
+              <!-- Commentaire (toujours visible) -->
+              <div class="mb-3">
+                <label class="form-label small">
+                  Commentaire
+                  <span class="text-muted">(optionnel)</span>
+                </label>
+                <textarea class="form-control form-control-sm"
+                          formControlName="commentaire"
+                          rows="3"
+                          placeholder="Observations complémentaires..."></textarea>
+              </div>
+
+              @if (submitError()) {
+                <div class="alert alert-danger py-2 small">{{ submitError() }}</div>
+              }
+
+              <button type="button"
+                      class="btn w-100"
+                      [class.btn-success]="!isModifie()"
+                      [class.btn-warning]="isModifie()"
+                      [disabled]="isSubmitting()"
+                      (click)="submit()">
+                @if (isSubmitting()) {
+                  <span class="spinner-border spinner-border-sm me-2"></span>
+                }
+                @if (!isModifie()) {
+                  <i class="bi bi-check-circle me-1"></i> Confirmer la prédiction
+                } @else {
+                  <i class="bi bi-save me-1"></i> Enregistrer la correction
+                }
+              </button>
+
+            </form>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  }
+
+</div>
