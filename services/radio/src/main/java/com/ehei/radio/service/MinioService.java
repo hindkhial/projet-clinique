@@ -20,6 +20,9 @@ public class MinioService {
     @Value("${minio.bucket-name}")
     private String bucketName;
 
+    @Value("${minio.heatmap-bucket-name}")
+    private String heatmapBucketName;
+
 
     public String uploadRadioImage(MultipartFile file, Long radioId) {
         try {
@@ -56,10 +59,13 @@ public class MinioService {
 
     public InputStream downloadRadioImage(String fileUrl) {
         try {
-            String filename = fileUrl.substring(fileUrl.indexOf("/") + 1);
+            // Si l'URL contient le bucket (format: bucket/filename), on strip le bucket
+            // Si c'est un chemin relatif (format: heatmaps/filename), on le garde tel quel
+            String filename = fileUrl.startsWith(bucketName + "/")
+                    ? fileUrl.substring(bucketName.length() + 1)
+                    : fileUrl;
 
             log.info("Downloading radio image: {}", filename);
-
 
             InputStream stream = minioClient.getObject(
                     GetObjectArgs.builder()
@@ -69,7 +75,6 @@ public class MinioService {
             );
 
             log.info("Radio image downloaded: {}", filename);
-
             return stream;
 
         } catch (Exception e) {
@@ -99,6 +104,26 @@ public class MinioService {
         } catch (Exception e) {
             log.error("Error deleting radio image: {}", e.getMessage());
             throw new RuntimeException("Failed to delete radio image", e);
+        }
+    }
+
+    public InputStream downloadHeatmapImage(String fileUrl) {
+        try {
+            log.info("Downloading heatmap image: {}", fileUrl);
+
+            InputStream stream = minioClient.getObject(
+                    GetObjectArgs.builder()
+                            .bucket(heatmapBucketName)
+                            .object(fileUrl)
+                            .build()
+            );
+
+            log.info("Heatmap image downloaded: {}", fileUrl);
+            return stream;
+
+        } catch (Exception e) {
+            log.error("Error downloading heatmap image: {}", e.getMessage());
+            throw new RuntimeException("Failed to download heatmap image", e);
         }
     }
 }
