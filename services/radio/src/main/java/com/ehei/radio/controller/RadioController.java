@@ -171,7 +171,7 @@ public class RadioController {
                         return ResponseEntity.notFound().build();
                 }
 
-                InputStream imageStream = minioService.downloadFileFromUrl(radio.getHeatmapUrl());
+                InputStream imageStream = minioService.downloadRadioImage(radio.getHeatmapUrl());
 
                 return ResponseEntity.ok()
                                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=heatmap_" + id + ".jpg")

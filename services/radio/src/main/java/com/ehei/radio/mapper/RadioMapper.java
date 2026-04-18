@@ -13,8 +13,6 @@ public class RadioMapper {
                 .patientId(request.getPatientId())
                 .radiologueId(request.getRadiologueId())
                 .dateRadio(request.getDateRadio())
-                .patientNom(request.getPatientNom())       // ADD THIS
-                .patientPrenom(request.getPatientPrenom()) // ADD THIS
                 .notes(request.getNotes())
                 .build();
     }
