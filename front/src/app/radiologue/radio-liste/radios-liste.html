@@ -54,7 +54,7 @@
         @for (radio of filteredRadios(); track radio.id) {
           <tr style="cursor: pointer;" (click)="goToValidation(radio.id)">
             <td>
-              <span class="fw-semibold">{{ radio.patientNom }} {{ radio.patientPrenom }}</span>
+              <span class="fw-semibold">{{ getPatientNom(radio.patientId) }}</span>
             </td>
             <td>{{ radio.dateRadio | date:'dd/MM/yyyy HH:mm' }}</td>
             <td>{{ radio.typeMaladie ?? '—' }}</td>

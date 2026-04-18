@@ -5,6 +5,10 @@ import { RadioService } from '../../shared/services/radio.service';
 import { RadioResponse, RadioValidationRequest } from '../../shared/models/radio.models';
 import { extractApiError } from '../../shared/utils/api-error.util';
 import { DatePipe } from '@angular/common';
+import { forkJoin } from 'rxjs';
+import { PatientService } from '../../shared/services/patient.service';
+import { Patient } from '../../shared/models/patient.model';
+
 
 @Component({
   selector: 'app-radio-validation',
@@ -17,6 +21,7 @@ export class RadioValidation implements OnInit {
   private router       = inject(Router);
   private fb           = inject(FormBuilder);
   private radioService = inject(RadioService);
+  private patientService = inject(PatientService);
 
   radio       = signal<RadioResponse | null>(null);
   isLoading   = signal(false);
@@ -24,6 +29,8 @@ export class RadioValidation implements OnInit {
   isSubmitting = signal(false);
   submitError  = signal<string | null>(null);
   submitSuccess = signal(false);
+  patient = signal<Patient | null>(null);
+  isModifie = signal(false);
 
   // blobs images
   radioImageUrl   = signal<string | null>(null);
@@ -38,7 +45,6 @@ export class RadioValidation implements OnInit {
     commentaire: [''],
   });
 
-  isModifie = computed(() => this.form.get('decision')?.value === 'MODIFIE');
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -50,9 +56,14 @@ export class RadioValidation implements OnInit {
     this.isLoading.set(true);
     this.loadError.set(false);
 
-    this.radioService.getById(id).subscribe({
-      next: (radio) => {
+    forkJoin({
+      radio:   this.radioService.getById(id),
+      patients: this.patientService.getAll(),
+    }).subscribe({
+      next: ({ radio, patients }) => {
         this.radio.set(radio);
+        const p = patients.find(p => p.id === radio.patientId) ?? null;
+        this.patient.set(p);
         this.isLoading.set(false);
         this.prefillForm(radio);
         this.loadImages(id);
@@ -97,6 +108,7 @@ export class RadioValidation implements OnInit {
 
   setDecision(decision: 'CONFIRME' | 'MODIFIE'): void {
     this.form.patchValue({ decision });
+    this.isModifie.set(decision === 'MODIFIE');
 
     if (decision === 'MODIFIE') {
       this.form.get('typeMaladie')?.setValidators(Validators.required);

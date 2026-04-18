@@ -4,13 +4,13 @@ import { Login } from './auth/login/login/login';
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
   { path: 'login', component: Login },
+
   {
     path: 'receptionniste',
     loadComponent: () =>
       import('./receptionniste/layout/receptionniste-layout/receptionniste-layout').then(m => m.ReceptionnisteLayout),
     children: [
       { path: '', redirectTo: 'patients/recherche', pathMatch: 'full' },
-
       {
         path: 'patients/recherche',
         loadComponent: () =>
@@ -35,13 +35,11 @@ export const routes: Routes = [
         loadComponent: () =>
           import('./admin/staff/liste/liste').then(m => m.Liste),
       },
-
       {
         path: 'medecins',
         loadComponent: () =>
           import('./admin/medecins/liste/liste').then(m => m.Liste),
       },
-
     ],
   },
 
@@ -60,6 +58,25 @@ export const routes: Routes = [
         path: 'radios/historique',
         loadComponent: () =>
           import('./technicien/radios/historique/historique').then(m => m.Historique),
+      },
+    ],
+  },
+
+  {
+    path: 'radiologue',
+    loadComponent: () =>
+      import('./radiologue/layout/radiologue-layout/radiologue-layout').then(m => m.RadiologueLayout),
+    children: [
+      { path: '', redirectTo: 'radios', pathMatch: 'full' },
+      {
+        path: 'radios',
+        loadComponent: () =>
+          import('./radiologue/radio-liste/radios-liste').then(m => m.RadiosListe),
+      },
+      {
+        path: 'radios/:id',
+        loadComponent: () =>
+          import('./radiologue/radio-validation/radio-validation').then(m => m.RadioValidation),
       },
     ],
   },
