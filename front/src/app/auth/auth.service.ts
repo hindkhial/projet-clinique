@@ -129,7 +129,7 @@ export class AuthService {
     if (!payload?.['exp']) return;
 
     const expiresAt  = payload['exp'] * 1000;       // ms
-    const refreshAt  = expiresAt - 60_000;           // 60s before expiry
+    const refreshAt  = expiresAt - 120_000;           // 2min before expiry
     const delay      = refreshAt - Date.now();
 
     if (delay <= 0) {
