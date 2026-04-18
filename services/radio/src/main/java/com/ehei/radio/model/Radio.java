@@ -31,10 +31,6 @@ public class Radio {
     // URL du fichier radio dans MinIO
     private String fichierRadioUrl;
 
-    // Informations patient (dénormalisées)
-    private String patientNom;
-    private String patientPrenom;
-
     @Builder.Default
     @Column(nullable = false, columnDefinition = "varchar(255) default 'PENDING'")
     @Enumerated(EnumType.STRING)
