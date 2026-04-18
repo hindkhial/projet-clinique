@@ -23,3 +23,11 @@ export interface CreateRadioRequest {
   dateRadio: string;
   notes?: string;
 }
+
+export interface RadioValidationRequest {
+  decision: 'CONFIRME' | 'MODIFIE';
+  typeMaladie?: string;
+  confidence?: number;
+  riskLevel?: string;
+  commentaire?: string;
+}
