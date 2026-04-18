@@ -22,8 +22,6 @@ public class RadioMapper {
         return RadioResponse.builder()
                 .id(radio.getId())
                 .patientId(radio.getPatientId())
-                .patientNom(radio.getPatientNom())
-                .patientPrenom(radio.getPatientPrenom())
                 .radiologueId(radio.getRadiologueId())
                 .dateRadio(radio.getDateRadio())
                 .fichierRadioUrl(radio.getFichierRadioUrl())
