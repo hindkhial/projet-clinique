@@ -22,9 +22,6 @@ public class CreateRadioRequest {
     @NotNull(message = "Date est obligatoire")
     private LocalDateTime dateRadio;
 
-    private String patientNom;    // ADD THIS
-    private String patientPrenom; // ADD THIS
-
     private String notes;
 }
 
