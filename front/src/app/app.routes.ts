@@ -74,6 +74,11 @@ export const routes: Routes = [
           import('./radiologue/radio-liste/radios-liste').then(m => m.RadiosListe),
       },
       {
+        path: 'radios/historique',
+        loadComponent: () =>
+          import('./radiologue/radios-historique/radios-historique').then(m => m.RadiosHistorique),
+      },
+      {
         path: 'radios/:id',
         loadComponent: () =>
           import('./radiologue/radio-validation/radio-validation').then(m => m.RadioValidation),
