@@ -151,19 +151,43 @@ public class RadioService {
     @Transactional
     public void updateFromAiPrediction(com.ehei.ai.proto.AIPredictionEvent event) {
         log.info("Mise a jour du radio {} à partir de la prediction AI", event.getRadioId());
-        
+
         Long radioId = Long.parseLong(event.getRadioId());
         Radio radio = radioRepository.findById(radioId)
-            .orElseThrow(() -> new RadioNotFoundException(radioId));
-            
+                .orElseThrow(() -> new RadioNotFoundException(radioId));
+
         radio.setStatus(com.ehei.radio.model.RadioStatus.PREDICTED);
         radio.setTypeMaladie(event.getTypeMaladie());
         radio.setConfidence(event.getConfidence());
         radio.setRiskLevel(event.getRiskLevel());
-        radio.setHeatmapUrl(event.getHeatmapUrl());
-        
+        radio.setHeatmapUrl(normalizeHeatmapUrl(event.getHeatmapUrl()));
+
         radioRepository.save(radio);
         log.info("Prediction AI enregistrée pour le radio {}", radioId);
+    }
+
+    private String normalizeHeatmapUrl(String heatmapUrl) {
+        if (heatmapUrl == null || heatmapUrl.isBlank()) return heatmapUrl;
+
+        final String BUCKET = "heatmap-bucket";
+        final String SUBFOLDER = "heatmaps/";
+
+        // Case 1 - AI sends: "heatmaps/30_gradcam.jpg"  (missing bucket prefix entirely)
+        if (heatmapUrl.startsWith(SUBFOLDER) && !heatmapUrl.startsWith(BUCKET)) {
+            String normalized = BUCKET + "/" + heatmapUrl;
+            log.warn("Normalized heatmap URL from '{}' to '{}'", heatmapUrl, normalized);
+            return normalized;
+        }
+
+        // Case 2 - AI sends: "heatmap-bucket/30_gradcam.jpg" (missing subfolder)
+        if (heatmapUrl.startsWith(BUCKET + "/") && !heatmapUrl.startsWith(BUCKET + "/" + SUBFOLDER)) {
+            String normalized = BUCKET + "/" + SUBFOLDER + heatmapUrl.substring((BUCKET + "/").length());
+            log.warn("Normalized heatmap URL from '{}' to '{}'", heatmapUrl, normalized);
+            return normalized;
+        }
+
+        // Case 3 - already correct: "heatmap-bucket/heatmaps/30_gradcam.jpg"
+        return heatmapUrl;
     }
 
     @Transactional
