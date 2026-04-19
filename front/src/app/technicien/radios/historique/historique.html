@@ -1,0 +1,93 @@
+<div class="container py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0">Historique des radios</h4>
+  </div>
+
+  @if (successMessage()) {
+    <div class="alert alert-success d-flex align-items-center gap-2">
+      <i class="bi bi-check-circle-fill"></i>
+      {{ successMessage() }}
+    </div>
+  }
+
+  <div class="mb-3">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Rechercher par nom du patient..."
+      [value]="searchTerm()"
+      (input)="searchTerm.set($any($event.target).value)"
+    />
+  </div>
+
+  @if (isLoading()) {
+    <div class="d-flex align-items-center gap-2 text-secondary">
+      <span class="spinner-border spinner-border-sm"></span>
+      <span>Chargement...</span>
+    </div>
+  }
+
+  @if (loadError()) {
+    <div class="alert alert-danger">Erreur lors du chargement des radios.</div>
+  }
+
+  @if (!isLoading() && filteredRadios().length === 0) {
+    <div class="alert alert-info">Aucune radio trouvée.</div>
+  }
+
+  @if (filteredRadios().length > 0) {
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+      <tr>
+        <th>Patient</th>
+        <th>Date</th>
+        <th>Radiologue</th>
+        <th>Statut</th>
+        <th>Notes</th>
+        <th>Actions</th>
+      </tr>
+      </thead>
+      <tbody>
+        @for (radio of filteredRadios(); track radio.id) {
+          <tr>
+            <td>
+              <span class="fw-semibold">{{ getPatientNom(radio.patientId) }}</span>
+            </td>
+            <td>{{ radio.dateRadio | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>{{ getRadiologueNom(radio.radiologueId) }}</td>
+            <td>
+              <span class="badge {{ statusBadge(radio.status) }}">
+                {{ statusLabel(radio.status) }}
+              </span>
+            </td>
+            <td>
+              <span class="text-muted small">{{ radio.notes || '—' }}</span>
+            </td>
+            <td>
+              <button class="btn btn-sm btn-outline-primary me-2"
+                      title="Télécharger l'image"
+                      (click)="downloadRadio(radio.id)">
+                <i class="bi bi-download"></i>
+              </button>
+              <button class="btn btn-sm btn-outline-danger"
+                      title="Supprimer"
+                      (click)="deletingRadio.set(radio)">
+                <i class="bi bi-trash"></i>
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+</div>
+
+@if (deletingRadio()) {
+  <app-delete-modal
+    [radio]="deletingRadio()!"
+    (deleted)="onDeleted()"
+    (cancelled)="deletingRadio.set(null)"
+  />
+}

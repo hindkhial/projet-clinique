@@ -1,0 +1,94 @@
+<div class="container py-4">
+
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="mb-0">Radios en attente de validation</h4>
+      <span class="text-muted small">Prédictions IA à confirmer ou corriger</span>
+    </div>
+    <button class="btn btn-outline-secondary btn-sm" (click)="loadPredicted()">
+      <i class="bi bi-arrow-clockwise me-1"></i> Actualiser
+    </button>
+  </div>
+
+  <div class="mb-3">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Rechercher par nom du patient..."
+      [value]="searchTerm()"
+      (input)="searchTerm.set($any($event.target).value)"
+    />
+  </div>
+
+  @if (isLoading()) {
+    <div class="d-flex align-items-center gap-2 text-secondary">
+      <span class="spinner-border spinner-border-sm"></span>
+      <span>Chargement...</span>
+    </div>
+  }
+
+  @if (loadError()) {
+    <div class="alert alert-danger">Erreur lors du chargement des radios.</div>
+  }
+
+  @if (!isLoading() && !loadError() && filteredRadios().length === 0) {
+    <div class="alert alert-info">
+      <i class="bi bi-check-circle me-2"></i>
+      Aucune radio en attente de validation.
+    </div>
+  }
+
+  @if (filteredRadios().length > 0) {
+    <table class="table table-hover align-middle">
+      <thead class="table-light">
+      <tr>
+        <th>Patient</th>
+        <th>Date</th>
+        <th>Maladie détectée</th>
+        <th>Confiance IA</th>
+        <th>Risque</th>
+        <th>Action</th>
+      </tr>
+      </thead>
+      <tbody>
+        @for (radio of filteredRadios(); track radio.id) {
+          <tr style="cursor: pointer;" (click)="goToValidation(radio.id)">
+            <td>
+              <span class="fw-semibold">{{ getPatientNom(radio.patientId) }}</span>
+            </td>
+            <td>{{ radio.dateRadio | date:'dd/MM/yyyy HH:mm' }}</td>
+            <td>{{ radio.typeMaladie ?? '—' }}</td>
+            <td>
+              @if (radio.confidence !== null) {
+                <div class="d-flex align-items-center gap-2">
+                  <div class="progress flex-grow-1" style="height: 6px; min-width: 80px;">
+                    <div class="progress-bar"
+                         [style.width.%]="(radio.confidence * 100)"
+                         [class.bg-success]="radio.confidence >= 0.8"
+                         [class.bg-warning]="radio.confidence >= 0.5 && radio.confidence < 0.8"
+                         [class.bg-danger]="radio.confidence < 0.5">
+                    </div>
+                  </div>
+                  <span class="small text-muted">{{ (radio.confidence * 100).toFixed(0) }}%</span>
+                </div>
+              } @else {
+                <span class="text-muted">—</span>
+              }
+            </td>
+            <td>
+              <span class="badge {{ riskBadge(radio.riskLevel) }}">
+                {{ riskLabel(radio.riskLevel) }}
+              </span>
+            </td>
+            <td>
+              <button class="btn btn-sm btn-primary" (click)="goToValidation(radio.id); $event.stopPropagation()">
+                <i class="bi bi-pencil-square me-1"></i> Valider
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  }
+
+</div>

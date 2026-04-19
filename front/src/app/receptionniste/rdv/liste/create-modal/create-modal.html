@@ -28,24 +28,24 @@
 
               <div class="col-6">
                 <label class="form-label">Patient <span class="text-danger">*</span></label>
-                <select class="form-select" formControlName="idPatient"
-                        [class.is-invalid]="step1Form.get('idPatient')?.invalid && step1Form.get('idPatient')?.touched">
-                  <option [ngValue]="null" disabled>Sélectionner...</option>
-                  @for (p of patients(); track p.id) {
-                    <option [ngValue]="p.id">{{ p.nom }} {{ p.prenom }} — {{ p.email }}</option>
-                  }
-                </select>
-                <div class="invalid-feedback">Patient obligatoire.</div>
+                <app-patient-autocomplete
+                  [patients]="patients()"
+                  [selectedId]="step1Form.value.idPatient ?? null"
+                  [invalid]="!!(step1Form.get('idPatient')?.invalid && step1Form.get('idPatient')?.touched)"
+                  (selectedIdChange)="step1Form.get('idPatient')?.setValue($event); step1Form.get('idPatient')?.markAsTouched()"
+                />
               </div>
 
               <div class="col-6">
-                <label class="form-label">Patient <span class="text-danger">*</span></label>
-                <app-patient-autocomplete
-                  [patients]="patients()"
-                  [selectedId]="step1Form.value.idPatient"
-                  [invalid]="step1Form.get('idPatient')?.invalid && step1Form.get('idPatient')?.touched"
-                  (selectedIdChange)="step1Form.get('idPatient')?.setValue($event); step1Form.get('idPatient')?.markAsTouched()"
-                />
+                <label class="form-label">Médecin <span class="text-danger">*</span></label>
+                <select class="form-select" formControlName="idMedecin"
+                        [class.is-invalid]="step1Form.get('idMedecin')?.invalid && step1Form.get('idMedecin')?.touched">
+                  <option [ngValue]="null" disabled>Sélectionner...</option>
+                  @for (m of medecins(); track m.id) {
+                    <option [ngValue]="m.id">Dr. {{ m.nom }} {{ m.prenom }}</option>
+                  }
+                </select>
+                <div class="invalid-feedback">Médecin obligatoire.</div>
               </div>
 
               <div class="col-12">

@@ -13,8 +13,6 @@ import java.time.LocalDateTime;
 public class RadioResponse {
     private Long id;
     private Long patientId;
-    private String patientNom;
-    private String patientPrenom;
     private Long radiologueId;
     private LocalDateTime dateRadio;
     private String fichierRadioUrl;

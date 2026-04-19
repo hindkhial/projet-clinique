@@ -105,7 +105,7 @@ export class AuthService {
     }
 
     return this.http
-      .post<TokenResponse>('/api/auth/refresh', { refreshToken })
+      .post<TokenResponse>(`${environment.apiUrl}/auth/refresh`, { refreshToken })
       .pipe(
         tap({
           next: response => {
@@ -129,7 +129,7 @@ export class AuthService {
     if (!payload?.['exp']) return;
 
     const expiresAt  = payload['exp'] * 1000;       // ms
-    const refreshAt  = expiresAt - 60_000;           // 60s before expiry
+    const refreshAt  = expiresAt - 120_000;           // 2min before expiry
     const delay      = refreshAt - Date.now();
 
     if (delay <= 0) {
