@@ -1,0 +1,27 @@
+services:
+  orchestrator-service:
+    build: ../../services/orchestrator
+    container_name: orchestrator-service
+    environment:
+      PATIENT_SERVICE_URL: http://patient-service:9090
+      STAFF_SERVICE_URL: http://staff-service:9091
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_KAFKA_PRODUCER_KEY_SERIALIZER: org.apache.kafka.common.serialization.StringSerializer
+      SPRING_KAFKA_PRODUCER_VALUE_SERIALIZER: org.apache.kafka.common.serialization.ByteArraySerializer
+      SPRING_KAFKA_PRODUCER_ACKS: all
+      SPRING_KAFKA_PRODUCER_RETRIES: 3
+      SPRING_KAFKA_CONSUMER_GROUP_ID: orchestrator-service-group
+      SPRING_KAFKA_CONSUMER_KEY_DESERIALIZER: org.apache.kafka.common.serialization.StringDeserializer
+      SPRING_KAFKA_CONSUMER_VALUE_DESERIALIZER: org.apache.kafka.common.serialization.ByteArrayDeserializer
+      SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET: earliest
+    ports:
+      - "9098:9098"
+    depends_on:
+      kafka:
+        condition: service_healthy
+      patient-service:
+        condition: service_started
+      staff-service:
+        condition: service_started
+    networks:
+      - microservices-network
