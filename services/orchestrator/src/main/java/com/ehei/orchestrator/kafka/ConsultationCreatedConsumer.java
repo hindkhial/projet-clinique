@@ -55,8 +55,11 @@ public class ConsultationCreatedConsumer {
                     .setPatientId(patient.getId())
                     .setPatientNom(patient.getNom() != null ? patient.getNom() : "")
                     .setPatientPrenom(patient.getPrenom() != null ? patient.getPrenom() : "")
-                    .setPatientEmail(patient.getEmail() != null ? patient.getEmail() : "")
-                    .setPatientCin(patient.getCin() != null ? patient.getCin() : "");
+                    .setPatientEmail(patient.getEmail() != null ? patient.getEmail() : "");
+
+            if (event.hasTypeMaladie()) {
+                builder.setTypeMaladie(event.getTypeMaladie());
+            }
 
             if (medecin != null) {
                 builder.setMedecinId(medecin.getId())

@@ -16,10 +16,11 @@ message ReportDataReadyEvent {
   string patientNom = 7;
   string patientPrenom = 8;
   string patientEmail = 9;
-  string patientCin = 10;
 
   optional int64 medecinId = 11;
   string medecinNom = 12;
   string medecinPrenom = 13;
   string medecinSpecialite = 14;
+
+  optional string typeMaladie = 15;
 }
