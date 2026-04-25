@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package orchestrator.events;
+
+option java_package = "orchestrator.events";
+option java_multiple_files = true;
+
+message ReportDataReadyEvent {
+  int64 consultationId = 1;
+  string dateConsultation = 2;
+  string observations = 3;
+  string traitement = 4;
+  string type = 5;
+
+  int64 patientId = 6;
+  string patientNom = 7;
+  string patientPrenom = 8;
+  string patientEmail = 9;
+
+  optional int64 medecinId = 11;
+  string medecinNom = 12;
+  string medecinPrenom = 13;
+  string medecinSpecialite = 14;
+
+  optional string typeMaladie = 15;
+}
