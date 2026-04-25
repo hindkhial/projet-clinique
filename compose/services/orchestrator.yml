@@ -16,12 +16,12 @@ services:
       SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET: earliest
     ports:
       - "9101:9101"
-    depends_on:
-      kafka:
-        condition: service_healthy
-      patient-service:
-        condition: service_started
-      staff-service:
-        condition: service_started
+#    depends_on:
+#      kafka:
+#        condition: service_healthy
+#      patient-service:
+#        condition: service_started
+#      staff-service:
+#        condition: service_started
     networks:
       - microservices-network

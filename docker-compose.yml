@@ -37,4 +37,4 @@ include:
 #  - compose/ui/angular.yml
 
   # Orchestrator
-  - compose/services/orchestrator.yml
+#  - compose/services/orchestrator.yml
