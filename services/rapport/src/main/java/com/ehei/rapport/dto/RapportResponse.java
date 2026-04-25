@@ -16,13 +16,13 @@ public class RapportResponse {
     private String patientNom;
     private String patientPrenom;
     private String patientEmail;
+    private String patientCin;
     private Long medecinId;
     private String medecinNom;
     private String medecinPrenom;
     private String medecinSpecialite;
     private String typeRapport;
     private LocalDateTime dateRapport;
-    private String typeMaladie;
     private String observations;
     private String traitement;
     private String diagnostic;

@@ -34,6 +34,7 @@ public class Rapport {
     private String patientNom;
     private String patientPrenom;
     private String patientEmail;
+    private String patientCin;
 
     // Données Médecin (dénormalisées)
     private String medecinNom;
@@ -41,7 +42,6 @@ public class Rapport {
     private String medecinSpecialite;
 
     // Contenu du rapport
-    private String typeMaladie;
     @Column(columnDefinition = "TEXT")
     private String observations;
 

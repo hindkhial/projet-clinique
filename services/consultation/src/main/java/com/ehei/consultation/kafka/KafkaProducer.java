@@ -29,7 +29,6 @@ public class KafkaProducer {
         if (consultation.getIdRdv()     != null)  builder.setIdRdv(consultation.getIdRdv());
         if (consultation.getIdRadio()   != null)  builder.setIdRadio(consultation.getIdRadio());
         if (consultation.getIdAnalyse() != null)  builder.setIdAnalyse(consultation.getIdAnalyse());
-        if (consultation.getTypeMaladie() != null) builder.setTypeMaladie(consultation.getTypeMaladie());
 
         ConsultationCreatedEvent event = builder.build();
 

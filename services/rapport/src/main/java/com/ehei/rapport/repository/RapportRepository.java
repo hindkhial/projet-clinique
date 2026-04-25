@@ -15,6 +15,4 @@ public interface RapportRepository extends JpaRepository<Rapport, Long> {
     List<Rapport> findByMedecinId(Long medecinId);
 
     List<Rapport> findByConsultationId(Long consultationId);
-
-    boolean existsByConsultationId(Long consultationId);
 }
