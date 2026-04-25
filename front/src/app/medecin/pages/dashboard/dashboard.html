@@ -1,0 +1,177 @@
+<div class="container py-4">
+
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h4 class="mb-0">Dashboard</h4>
+      <span class="text-muted small">Vue d'ensemble de vos consultations et rendez-vous</span>
+    </div>
+    <button class="btn btn-outline-secondary btn-sm" (click)="loadAll()">
+      <i class="bi bi-arrow-clockwise me-1"></i> Actualiser
+    </button>
+  </div>
+
+  @if (isLoading()) {
+    <div class="d-flex align-items-center gap-2 text-secondary">
+      <span class="spinner-border spinner-border-sm"></span>
+      <span>Chargement...</span>
+    </div>
+  }
+
+  @if (loadError()) {
+    <div class="alert alert-danger">Erreur lors du chargement des données.</div>
+  }
+
+  @if (!isLoading() && !loadError()) {
+
+    <!-- Stats -->
+    <div class="row g-3 mb-4">
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+          <div class="fs-2 fw-bold text-primary">{{ consultations().length }}</div>
+          <div class="text-muted small">Consultations</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+          <div class="fs-2 fw-bold text-success">
+            {{ consultationsTraitees() }}
+          </div>
+          <div class="text-muted small">Traitées</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+          <div class="fs-2 fw-bold text-warning">
+            {{ consultationsEnAttente() }}
+          </div>
+          <div class="text-muted small">En attente</div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm text-center p-3">
+          <div class="fs-2 fw-bold text-info">{{ rdvs().length }}</div>
+          <div class="text-muted small">Rendez-vous</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="mb-3">
+      <input type="text"
+             class="form-control"
+             placeholder="Rechercher par nom du patient..."
+             [value]="searchTerm()"
+             (input)="searchTerm.set($any($event.target).value)" />
+    </div>
+
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-3">
+      <li class="nav-item">
+        <button class="nav-link"
+                [class.active]="activeTab() === 'consultations'"
+                (click)="activeTab.set('consultations')">
+          <i class="bi bi-clipboard2-pulse me-1"></i>
+          Consultations
+          <span class="badge bg-primary ms-1">{{ filteredConsultations().length }}</span>
+        </button>
+      </li>
+      <li class="nav-item">
+        <button class="nav-link"
+                [class.active]="activeTab() === 'rdv'"
+                (click)="activeTab.set('rdv')">
+          <i class="bi bi-calendar-check me-1"></i>
+          Rendez-vous
+          <span class="badge bg-primary ms-1">{{ filteredRdvs().length }}</span>
+        </button>
+      </li>
+    </ul>
+
+    <!-- Tab Consultations -->
+    @if (activeTab() === 'consultations') {
+      @if (filteredConsultations().length === 0) {
+        <div class="alert alert-info">Aucune consultation trouvée.</div>
+      } @else {
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+          <tr>
+            <th>Patient</th>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Maladie</th>
+            <th>Risque</th>
+            <th>Statut</th>
+            <th>Action</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (c of filteredConsultations(); track c.id) {
+              <tr style="cursor: pointer;" (click)="goToConsultation(c.id)">
+                <td>
+                  <span class="fw-semibold">{{ getPatientNom(c.idPatient) }}</span>
+                </td>
+                <td>{{ c.dateConsultation | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  <span class="badge {{ typeBadge(c.type) }}">{{ c.type }}</span>
+                </td>
+                <td>{{ c.typeMaladie ?? '—' }}</td>
+                <td>
+                  <span class="badge {{ riskBadge(c.riskLevel) }}">
+                    {{ riskLabel(c.riskLevel) }}
+                  </span>
+                </td>
+                <td>
+                  @if (c.observation) {
+                    <span class="badge bg-success">Traitée</span>
+                  } @else {
+                    <span class="badge bg-warning text-dark">En attente</span>
+                  }
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-outline-primary"
+                          (click)="goToConsultation(c.id); $event.stopPropagation()">
+                    <i class="bi bi-eye me-1"></i> Voir
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    }
+
+    <!-- Tab RDV -->
+    @if (activeTab() === 'rdv') {
+      @if (filteredRdvs().length === 0) {
+        <div class="alert alert-info">Aucun rendez-vous trouvé.</div>
+      } @else {
+        <table class="table table-hover align-middle">
+          <thead class="table-light">
+          <tr>
+            <th>Patient</th>
+            <th>Date</th>
+            <th>Statut</th>
+          </tr>
+          </thead>
+          <tbody>
+            @for (r of filteredRdvs(); track r.id) {
+              <tr>
+                <td>
+                  <span class="fw-semibold">{{ getPatientNom(r.idPatient) }}</span>
+                </td>
+                <td>{{ r.dateRdv | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  <span class="badge {{ rdvStatusBadge(r) }}">
+                    {{ rdvStatusLabel(r) }}
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    }
+
+  }
+
+</div>
