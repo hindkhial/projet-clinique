@@ -3,7 +3,7 @@ package com.ehei.rapport.mapper;
 import com.ehei.rapport.dto.CreateRapportRequest;
 import com.ehei.rapport.dto.RapportResponse;
 import com.ehei.rapport.model.Rapport;
-import orchestrator.events.ReportDataReadyEvent;
+import consultation.events.ConsultationCreatedEvent;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -26,23 +26,16 @@ public class RapportMapper {
                 .build();
     }
 
-    // ── From ReportDataReadyEvent (Kafka Orchestrator) ──────────────────────────────
+    // ── From ConsultationCreatedEvent (Kafka) ──────────────────────────────
 
-    public Rapport fromEnrichedEvent(ReportDataReadyEvent event) {
+    public Rapport fromConsultationEvent(ConsultationCreatedEvent event) {
         return Rapport.builder()
-                .consultationId(event.getConsultationId())
-                .patientId(event.getPatientId())
-                .patientNom(event.getPatientNom())
-                .patientPrenom(event.getPatientPrenom())
-                .patientEmail(event.getPatientEmail())
-                .typeMaladie(event.hasTypeMaladie() ? event.getTypeMaladie() : null)
-                .medecinId(event.hasMedecinId() ? event.getMedecinId() : null)
-                .medecinNom(event.getMedecinNom())
-                .medecinPrenom(event.getMedecinPrenom())
-                .medecinSpecialite(event.getMedecinSpecialite())
+                .consultationId(event.getId())
+                .patientId(event.getIdPatient())
+                .medecinId(event.hasIdMedecin() ? event.getIdMedecin() : null)
                 .typeRapport(event.getType())   // NORMAL, RADIO, ANALYSES
                 .dateRapport(LocalDateTime.now())
-                .observations(event.getObservations().isEmpty() ? null : event.getObservations())
+                .observations(event.getObservation().isEmpty() ? null : event.getObservation())
                 .traitement(event.getTraitement().isEmpty() ? null : event.getTraitement())
                 .build();
     }
@@ -56,7 +49,7 @@ public class RapportMapper {
                 .patientNom(rapport.getPatientNom())
                 .patientPrenom(rapport.getPatientPrenom())
                 .patientEmail(rapport.getPatientEmail())
-                .typeMaladie(rapport.getTypeMaladie())
+                .patientCin(rapport.getPatientCin())
                 .medecinId(rapport.getMedecinId())
                 .medecinNom(rapport.getMedecinNom())
                 .medecinPrenom(rapport.getMedecinPrenom())

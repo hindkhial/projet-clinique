@@ -85,23 +85,4 @@ export const routes: Routes = [
       },
     ],
   },
-
-  {
-    path: 'medecin',
-    loadComponent: () =>
-      import('./medecin/layout/medecin-layout/medecin-layout').then(m => m.MedecinLayout),
-    children: [
-      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-      {
-        path: 'dashboard',
-        loadComponent: () =>
-          import('./medecin/pages/dashboard/dashboard').then(m => m.Dashboard),
-      },
-      {
-        path: 'consultations/:id',
-        loadComponent: () =>
-          import('./medecin/pages/consultation-detail/consultation-detail').then(m => m.ConsultationDetail),
-      },
-    ],
-  },
 ];
