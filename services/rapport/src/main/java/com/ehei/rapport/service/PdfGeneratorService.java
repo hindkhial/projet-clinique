@@ -46,7 +46,6 @@ public class PdfGeneratorService {
             addSection(document, "INFORMATIONS PATIENT");
             addLine(document, "Nom: " + getValue(rapport.getPatientNom()));
             addLine(document, "Prénom: " + getValue(rapport.getPatientPrenom()));
-            addLine(document, "CIN: " + getValue(rapport.getPatientCin()));
             document.add(new Paragraph("\n"));
 
             // === MEDECIN INFO ===
@@ -57,9 +56,14 @@ public class PdfGeneratorService {
             document.add(new Paragraph("\n"));
 
             // === DIAGNOSTIC ===
-            if (rapport.getDiagnostic() != null) {
+            if (rapport.getDiagnostic() != null || rapport.getTypeMaladie() != null) {
                 addSection(document, "DIAGNOSTIC");
-                addLine(document, rapport.getDiagnostic());
+                if (rapport.getTypeMaladie() != null) {
+                    addLine(document, "Type de Maladie: " + rapport.getTypeMaladie());
+                }
+                if (rapport.getDiagnostic() != null) {
+                    addLine(document, rapport.getDiagnostic());
+                }
                 document.add(new Paragraph("\n"));
             }
 

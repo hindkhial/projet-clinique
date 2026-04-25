@@ -82,5 +82,8 @@ public class ConsultationMapper {
     public void updateEntity(Consultation consultation, ConsultationUpdateRequest dto) {
         consultation.setObservation(dto.getObservation());
         consultation.setTraitement(dto.getTraitement());
+        if (dto.getTypeMaladie() != null && !dto.getTypeMaladie().trim().isEmpty()) {
+            consultation.setTypeMaladie(dto.getTypeMaladie());
+        }
     }
 }

@@ -16,4 +16,5 @@ message ConsultationCreatedEvent {
   string type             = 8;  // NORMAL, RADIO, ANALYSES
   optional string idRadio         = 9;
   optional int64  idAnalyse       = 10;
+  optional string typeMaladie     = 11;
 }

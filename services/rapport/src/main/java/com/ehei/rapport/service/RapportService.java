@@ -8,7 +8,7 @@ import com.ehei.rapport.kafka.KafkaProducer;
 import com.ehei.rapport.mapper.RapportMapper;
 import com.ehei.rapport.model.Rapport;
 import com.ehei.rapport.repository.RapportRepository;
-import consultation.events.ConsultationCreatedEvent;
+import orchestrator.events.ReportDataReadyEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -61,11 +61,16 @@ public class RapportService {
     // ── Auto creation from ConsultationCreatedEvent (Kafka) ───────────────
 
     @Transactional
-    public void createFromConsultationEvent(ConsultationCreatedEvent event) {
-        log.info("Creation rapport depuis consultation id: {} type: {}",
-                event.getId(), event.getType());
+    public void createFromEnrichedEvent(ReportDataReadyEvent event) {
+        log.info("Creation rapport depuis event enrichi consultation id: {} type: {}",
+                event.getConsultationId(), event.getType());
 
-        Rapport rapport = rapportMapper.fromConsultationEvent(event);
+        if (rapportRepository.existsByConsultationId(event.getConsultationId())) {
+            log.info("Rapport deja existant pour la consultation {}, ignorance de l'evenement", event.getConsultationId());
+            return;
+        }
+
+        Rapport rapport = rapportMapper.fromEnrichedEvent(event);
         Rapport savedRapport = rapportRepository.save(rapport);
 
         log.info("Rapport cree avec succes - ID: {}", savedRapport.getId());
