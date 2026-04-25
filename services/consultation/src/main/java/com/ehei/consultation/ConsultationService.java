@@ -28,7 +28,6 @@ public class ConsultationService {
 
         Consultation savedConsultation = consultationRepository.save(consultation);
 
-        kafkaProducer.sendEvent(savedConsultation);
         return consultationMapper.toResponseDto(savedConsultation);
     }
 
@@ -69,9 +68,10 @@ public class ConsultationService {
 
         consultationMapper.updateEntity(consultation, dto);
 
-        return consultationMapper.toResponseDto(
-                consultationRepository.save(consultation)
-        );
+        Consultation savedConsultation = consultationRepository.save(consultation);
+        kafkaProducer.sendEvent(savedConsultation);
+
+        return consultationMapper.toResponseDto(savedConsultation);
     }
 
     public void deleteById(Long id) {

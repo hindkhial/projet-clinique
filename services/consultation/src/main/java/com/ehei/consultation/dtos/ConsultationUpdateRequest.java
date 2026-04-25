@@ -17,4 +17,6 @@ public class ConsultationUpdateRequest {
 
     @NotBlank(message = "traitement est obligatoire")
     private String traitement;
+
+    private String typeMaladie; // Optional, can be null if patient is "sain"
 }
