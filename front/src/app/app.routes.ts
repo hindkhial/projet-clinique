@@ -104,4 +104,18 @@ export const routes: Routes = [
       },
     ],
   },
+
+  {
+    path: 'patient',
+    loadComponent: () =>
+      import('./patient/layout/patient-layout/patient-layout').then(m => m.PatientLayout),
+    children: [
+      { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./patient/pages/dashboard/dashboard').then(m => m.Dashboard),
+      },
+    ],
+  },
 ];
