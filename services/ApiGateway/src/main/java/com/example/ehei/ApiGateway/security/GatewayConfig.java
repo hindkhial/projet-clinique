@@ -53,6 +53,7 @@ public class GatewayConfig {
                     ServerHttpRequest mutatedRequest = exchange.getRequest()
                             .mutate()
                             .header("X-User-Id", userId)
+                            .header("X-Internal-Id", internalId)
                             .header("X-User-Email", email != null ? email : "")
                             .header("X-User-Roles", String.join(",", roles)) // ex: "DOCTOR,ADMIN"
                             .build();
