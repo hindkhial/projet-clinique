@@ -38,7 +38,7 @@ public class ConsultationService {
 
         Consultation savedConsultation = consultationRepository.save(consultation);
 
-        kafkaProducer.sendEvent(savedConsultation);
+
     }
 
     // ANALYSES consultation
