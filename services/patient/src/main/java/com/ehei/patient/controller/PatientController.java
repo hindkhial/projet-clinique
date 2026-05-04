@@ -174,10 +174,10 @@ public class PatientController {
 
     @GetMapping("/me")
     public ResponseEntity<com.ehei.patient.dto.ApiResponse<PatientResponse>> getMe(
-            @RequestHeader("X-Internal-Id") Long id,
-            @RequestHeader("X-User-Roles") String rolesHeader
+            @RequestHeader("X-Internal-Id") Long id
+//            @RequestHeader("X-User-Roles") String rolesHeader
     ) {
-        SecurityUtils.requireRole(rolesHeader, "PATIENT");
+//        SecurityUtils.requireRole(rolesHeader, "PATIENT");
         PatientResponse response = patientService.getById(id);
         return ResponseEntity.ok(com.ehei.patient.dto.ApiResponse.success(response));
     }
