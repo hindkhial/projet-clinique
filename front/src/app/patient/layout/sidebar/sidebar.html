@@ -27,6 +27,66 @@
       </a>
     </li>
 
+    <li class="nav-item">
+      <a routerLink="/patient/informations"
+         routerLinkActive="active"
+         class="nav-link link-body-emphasis">
+        <i class="bi bi-person-lines-fill me-2"></i>
+        Mes informations
+      </a>
+    </li>
+
+    <li>
+      <span class="nav-link text-muted small px-2 py-1 text-uppercase fw-semibold"
+            style="font-size: 0.7rem; letter-spacing: .05em;">
+        Rendez-vous
+      </span>
+    </li>
+
+    <li class="nav-item">
+      <a routerLink="/patient/rdv/nouveau"
+         routerLinkActive="active"
+         class="nav-link link-body-emphasis">
+        <i class="bi bi-calendar-plus me-2"></i>
+        Prendre un RDV
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a routerLink="/patient/rdv"
+         routerLinkActive="active"
+         [routerLinkActiveOptions]="{ exact: true }"
+         class="nav-link link-body-emphasis">
+        <i class="bi bi-calendar-check me-2"></i>
+        Mes RDV
+      </a>
+    </li>
+
+    <li>
+      <span class="nav-link text-muted small px-2 py-1 text-uppercase fw-semibold"
+            style="font-size: 0.7rem; letter-spacing: .05em;">
+        Dossier Médical
+      </span>
+    </li>
+
+    <li class="nav-item">
+      <a routerLink="/patient/consultations"
+         routerLinkActive="active"
+         class="nav-link link-body-emphasis">
+        <i class="bi bi-file-medical me-2"></i>
+        Mes consultations
+      </a>
+    </li>
+
+    <li class="nav-item">
+      <a routerLink="/patient/radios"
+         routerLinkActive="active"
+         class="nav-link link-body-emphasis">
+        <i class="bi bi-radioactive me-2"></i>
+        Mes radios
+      </a>
+    </li>
+
   </ul>
 
   <hr>
