@@ -1,3 +1,23 @@
+# Hospital Management System — Projet scolaire
+
+> Projet réalisé en équipe dans un cadre scolaire, à des fins pédagogiques et de démonstration. Il n'est utilisé par aucune clinique réelle et n'est pas destiné à la prise en charge de patients.
+
+Cette copie de portfolio conserve les auteurs et la structure de l'historique du projet collectif. Les identifiants de commits ont changé pour retirer les anciennes valeurs de configuration et le fichier `.env` archivé.
+
+## Configuration locale de démonstration
+
+Les mots de passe et secrets sont fournis par des variables d'environnement. Aucun identifiant réel ne doit être ajouté au dépôt.
+
+1. Copier `.env.example` vers `.env` à la racine et remplacer toutes les valeurs `replace-with-...` par des valeurs locales.
+2. Créer le client Keycloak `auth-service-client`, puis reporter son secret local dans `KEYCLOAK_CLIENT_SECRET`.
+3. Lancer Docker Compose depuis la racine : `docker compose --env-file .env up -d`.
+4. Pour lancer les services Spring Boot hors Docker, exporter aussi ces variables dans leur environnement ; Spring Boot ne charge pas automatiquement le fichier `.env`.
+5. Pour le service Python, copier `AI-radio/.env.example` vers `AI-radio/.env` et renseigner les mêmes identifiants MinIO. `MINIO_ACCESS_KEY` doit correspondre à `MINIO_ROOT_USER`, et `MINIO_SECRET_KEY` au mot de passe MinIO.
+
+Les fichiers `.env` locaux sont ignorés par Git. Les modèles d'IA ne sont pas inclus ; leur configuration reste nécessaire pour exécuter ce service. Le nettoyage de publication ne constitue pas une validation du fonctionnement complet de l'application.
+
+---
+
 Hospital Management System - Microservices Architecture
 Un système de gestion hospitalière moderne basé sur une architecture microservices avec Spring Boot et Keycloak pour l'authentification.
 📋 Table des matières
@@ -116,7 +136,7 @@ Password: <set locally>
 
 Créer un realm nommé hospital-realm
 Créer un client auth-service-client
-Configurer le client secret (remplacer your-client-secret dans docker-compose.yml)
+Configurer le client secret via la variable KEYCLOAK_CLIENT_SECRET de votre environnement local.
 
 Variables d'environnement
 Chaque service utilise des variables d'environnement pour sa configuration. Pour personnaliser :
